@@ -1,0 +1,16 @@
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev}
+
+  api:
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-asl}:${POSTGRES_PASSWORD:-localdev}@postgres:5432/${POSTGRES_DB:-asl}
+
+  caddy:
+    profiles:
+      - never

@@ -1,0 +1,317 @@
+export type Lang = 'es' | 'en';
+
+const translations = {
+  es: {
+    nav: {
+      login: 'Entrar',
+      register: 'Registrarse',
+    },
+    landing: {
+      tagline: 'Aprende ASL como un juego',
+      title: 'Habla con las manos.',
+      subtitle:
+        'Domina el Lenguaje de Señas Americano con lecciones cortas, divertidas y prácticas en cámara real.',
+      cta: 'Empezar Gratis',
+      already: 'Ya tengo cuenta',
+      features: {
+        f1Title: 'Lecciones cortas',
+        f1Desc: '5 minutos al día y verás el progreso.',
+        f2Title: 'Practica con cámara',
+        f2Desc: 'Repite las señas y recibe feedback al instante.',
+        f3Title: 'Camino gamificado',
+        f3Desc: 'Sube de nivel, gana XP y mantén tu racha.',
+      },
+    },
+    login: {
+      title: 'Bienvenido de vuelta',
+      subtitle: 'Inicia sesión para continuar tu camino',
+      email: 'Correo electrónico',
+      password: 'Contraseña',
+      submit: 'Iniciar sesión',
+      noAccount: '¿No tienes cuenta?',
+      register: 'Regístrate',
+      error: 'Correo o contraseña incorrectos',
+    },
+    register: {
+      title: 'Crea tu cuenta',
+      subtitle: 'Únete y empieza a aprender hoy',
+      name: 'Nombre completo',
+      email: 'Correo electrónico',
+      password: 'Contraseña',
+      submit: 'Crear cuenta',
+      hasAccount: '¿Ya tienes cuenta?',
+      login: 'Inicia sesión',
+    },
+    tabs: {
+      home: 'Inicio',
+      learn: 'Aprender',
+      profile: 'Perfil',
+    },
+    home: {
+      greeting: 'Hola, {name}! 🔥',
+      streak: 'Racha',
+      xp: 'XP Total',
+      dailyGoal: 'Meta diaria',
+      completed: 'Completadas',
+      progressLabel: 'Progreso general',
+      continueButton: 'Continuar aprendiendo →',
+      days: 'días',
+      lessons: 'lecciones',
+    },
+    learn: {
+      title: 'Tu camino ASL',
+      subtitle: 'Avanza paso a paso. Cada nodo es una lección.',
+      xpLabel: 'XP',
+    },
+    challenges: {
+      title: 'Desafíos',
+      subtitle: 'Completa desafíos para ganar XP extra',
+      back: '← Volver',
+      viewAll: 'Ver todos →',
+      categories: {
+        streak: 'Racha',
+        alphabet: 'Alfabeto',
+        practice: 'Práctica',
+        mastery: 'Dominio',
+      },
+    },
+    lesson: {
+      back: '← Volver al camino',
+      watchAndLearn: 'Mira y aprende',
+      practiceCamera: 'Practica con la cámara',
+      letterTitle: 'Letra {letter}',
+      spellTitle: 'Deletrea "{word}"',
+      gotIt: '¡Entendido!',
+      sign: 'Muestra la seña: {word}',
+      hint: '{description}',
+      cameraPermission: 'Se necesita acceso a la cámara para practicar',
+      allowCamera: 'Permitir cámara',
+      startCamera: 'Abrir cámara',
+      stopCamera: 'Cerrar cámara',
+      checkSign: 'Verificar seña',
+      signSuccess: '¡Bien! Seña reconocida.',
+      signMiss: 'No pudimos reconocer la seña. Inténtalo de nuevo.',
+      scanning: 'Analizando...',
+      skip: 'Saltar',
+      tryAgain: 'Intentar de nuevo',
+      continue: 'Continuar',
+      quizPrompt: '¿Qué seña es esta?',
+      completeTitle: '¡Lección completada!',
+      completeXp: '+{xp} XP ganados',
+      backToPath: 'Volver al camino',
+      notFound: 'Lección no encontrada',
+      goBack: 'Regresar',
+    },
+    subscription: {
+      freeBadge: 'Plan Gratis',
+      proBadge: 'Pro',
+      upgradeTitle: 'Desbloquea videos de señas',
+      upgradeDesc:
+        'Los videos paso a paso muestran cómo hacer cada seña. Actualiza a Pro para verlos.',
+      upgradeCta: 'Actualizar a Pro →',
+      proActive: '¡Eres Pro!',
+      proActiveDesc: 'Tienes acceso a todos los videos de señas.',
+      wantVideo: '¿Quieres ver el video?',
+      upgradeLink: 'Actualiza a Pro',
+      videoLocked: 'Video solo para Pro',
+      videoLockedDesc:
+        'Actualiza para ver videos de cómo hacer cada seña.',
+      perks: [
+        'Videos paso a paso de cada seña',
+        'Acceso completo al alfabeto ASL',
+        'Nuevas lecciones en video primero',
+      ],
+    },
+    profile: {
+      level: 'Nivel {level}',
+      levelLabel: 'Nivel',
+      xpTotal: '{xp} XP',
+      xpToNext: '{xp} para Nv {level}',
+      levelPath: 'Ruta de niveles',
+      challenges: 'Desafíos',
+      claimed: 'Reclamado ✓',
+      readyToClaim: 'Listo para reclamar',
+      activity: 'Calendario de racha',
+      practiceDays: 'días de práctica',
+      prevMonth: 'Mes anterior',
+      nextMonth: 'Mes siguiente',
+      less: 'Menos',
+      more: 'Más',
+      signOut: 'Cerrar sesión',
+      currentStreak: 'Racha actual',
+      bestStreak: 'Mejor racha',
+      totalDays: 'Días totales',
+      days: 'días',
+    },
+  },
+  en: {
+    nav: {
+      login: 'Login',
+      register: 'Sign Up',
+    },
+    landing: {
+      tagline: 'Learn ASL like a game',
+      title: 'Speak with your hands.',
+      subtitle:
+        'Master American Sign Language with short, fun lessons and real camera practice.',
+      cta: 'Start Free',
+      already: 'I have an account',
+      features: {
+        f1Title: 'Short lessons',
+        f1Desc: "5 minutes a day and you'll see real progress.",
+        f2Title: 'Practice with camera',
+        f2Desc: 'Repeat signs and get instant feedback.',
+        f3Title: 'Gamified path',
+        f3Desc: 'Level up, earn XP and keep your streak.',
+      },
+    },
+    login: {
+      title: 'Welcome back',
+      subtitle: 'Sign in to continue your journey',
+      email: 'Email address',
+      password: 'Password',
+      submit: 'Sign in',
+      noAccount: "Don't have an account?",
+      register: 'Sign up',
+      error: 'Incorrect email or password',
+    },
+    register: {
+      title: 'Create your account',
+      subtitle: 'Join and start learning today',
+      name: 'Full name',
+      email: 'Email address',
+      password: 'Password',
+      submit: 'Create account',
+      hasAccount: 'Already have an account?',
+      login: 'Sign in',
+    },
+    tabs: {
+      home: 'Home',
+      learn: 'Learn',
+      profile: 'Profile',
+    },
+    home: {
+      greeting: 'Hello, {name}! 🔥',
+      streak: 'Streak',
+      xp: 'Total XP',
+      dailyGoal: 'Daily goal',
+      completed: 'Completed',
+      progressLabel: 'Overall progress',
+      continueButton: 'Continue learning →',
+      days: 'days',
+      lessons: 'lessons',
+    },
+    learn: {
+      title: 'Your ASL path',
+      subtitle: 'Move forward step by step. Each node is a lesson.',
+      xpLabel: 'XP',
+    },
+    challenges: {
+      title: 'Challenges',
+      subtitle: 'Complete challenges to earn bonus XP',
+      back: '← Back',
+      viewAll: 'View all →',
+      categories: {
+        streak: 'Streak',
+        alphabet: 'Alphabet',
+        practice: 'Practice',
+        mastery: 'Mastery',
+      },
+    },
+    lesson: {
+      back: '← Back to path',
+      watchAndLearn: 'Watch and learn',
+      practiceCamera: 'Practice with camera',
+      letterTitle: 'Letter {letter}',
+      spellTitle: 'Spell "{word}"',
+      gotIt: 'Got it!',
+      sign: 'Show the sign: {word}',
+      hint: '{description}',
+      cameraPermission: 'Camera access is needed to practice signs',
+      allowCamera: 'Allow camera',
+      startCamera: 'Open camera',
+      stopCamera: 'Close camera',
+      checkSign: 'Check sign',
+      signSuccess: 'Nice! Sign recognized.',
+      signMiss: "We couldn't recognize the sign. Try again.",
+      scanning: 'Analyzing...',
+      skip: 'Skip',
+      tryAgain: 'Try again',
+      continue: 'Continue',
+      quizPrompt: 'Which sign is this?',
+      completeTitle: 'Lesson complete!',
+      completeXp: '+{xp} XP earned',
+      backToPath: 'Back to path',
+      notFound: 'Lesson not found',
+      goBack: 'Go back',
+    },
+    subscription: {
+      freeBadge: 'Free Plan',
+      proBadge: 'Pro',
+      upgradeTitle: 'Unlock sign videos',
+      upgradeDesc:
+        'Step-by-step videos show how to make each sign. Upgrade to Pro to watch them.',
+      upgradeCta: 'Upgrade to Pro →',
+      proActive: "You're Pro!",
+      proActiveDesc: 'You have access to all sign videos.',
+      wantVideo: 'Want to see the video?',
+      upgradeLink: 'Upgrade to Pro',
+      videoLocked: 'Pro video only',
+      videoLockedDesc:
+        'Upgrade to watch step-by-step sign videos.',
+      perks: [
+        'Step-by-step videos for every sign',
+        'Full ASL alphabet video access',
+        'New video lessons first',
+      ],
+    },
+    profile: {
+      level: 'Level {level}',
+      levelLabel: 'Level',
+      xpTotal: '{xp} XP',
+      xpToNext: '{xp} to Lv {level}',
+      levelPath: 'Level path',
+      challenges: 'Challenges',
+      claimed: 'Claimed ✓',
+      readyToClaim: 'Ready to claim',
+      activity: 'Streak calendar',
+      practiceDays: 'practice days',
+      prevMonth: 'Previous month',
+      nextMonth: 'Next month',
+      less: 'Less',
+      more: 'More',
+      signOut: 'Sign out',
+      currentStreak: 'Current streak',
+      bestStreak: 'Best streak',
+      totalDays: 'Total days',
+      days: 'days',
+    },
+  },
+} as const;
+
+export type Translations = (typeof translations)['es'];
+
+export function getTranslations(lang: Lang): Translations {
+  return translations[lang] as unknown as Translations;
+}
+
+export function t(
+  translations: Translations,
+  path: string,
+  params?: Record<string, string | number>,
+): string {
+  const keys = path.split('.');
+  let result: unknown = translations;
+  for (const key of keys) {
+    if (result && typeof result === 'object' && key in result) {
+      result = (result as Record<string, unknown>)[key];
+    } else {
+      return path;
+    }
+  }
+  if (typeof result !== 'string') return path;
+  if (!params) return result;
+  return result.replace(/\{(\w+)\}/g, (_, k: string) =>
+    params[k] !== undefined ? String(params[k]) : `{${k}}`,
+  );
+}
