@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { NBCard } from '@/components/NBCard';
 import { NBProgressBar } from '@/components/NBProgressBar';
@@ -24,7 +24,12 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
         style={styles.header}
       >
         <View style={styles.levelRow}>
-          <Text style={styles.medal}>{level.current.medal}</Text>
+          <Image
+            source={level.current.medal}
+            resizeMode="contain"
+            accessibilityLabel={level.current.medalLabel}
+            style={styles.medalImage}
+          />
           <View>
             <Text style={styles.levelTitle}>
               {t(i18n, 'profile.level', { level: level.current.level })} · {level.current.title}
@@ -81,9 +86,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  medal: {
-    fontSize: 36,
-  },
   levelTitle: {
     color: colors.text,
     fontFamily: 'Nunito_800ExtraBold',
@@ -115,5 +117,9 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontFamily: 'Nunito_600SemiBold',
     fontSize: 12,
+  },
+  medalImage: {
+  height: 72,
+  width: 72,
   },
 });

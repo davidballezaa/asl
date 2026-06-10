@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
@@ -31,9 +31,16 @@ export function LevelRoadmap({ currentLevel, totalXp }: LevelRoadmapProps) {
               },
             ]}
           >
-            <Text style={[styles.medal, { opacity: unlocked ? 1 : 0.35 }]}>
-              {tier.medal}
-            </Text>
+            <Image
+              source={tier.medal}
+              resizeMode="contain"
+              accessibilityLabel={tier.medalLabel}
+              style={[
+                styles.medalImage,
+                { opacity: unlocked ? 1 : 0.35 },
+              ]}
+            />
+
             <View style={styles.info}>
               <Text
                 style={[
@@ -79,10 +86,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
-  medal: {
-    fontSize: 22,
-    textAlign: 'center',
-    width: 28,
+  medalImage: {
+    height:32,
+    width: 32,
   },
   info: {
     flex: 1,
