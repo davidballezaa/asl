@@ -48,7 +48,7 @@ const translations = {
       profile: 'Perfil',
     },
     home: {
-      greeting: 'Hola, {name}! 🔥',
+      greeting: 'Hola, {name}!',
       streak: 'Racha',
       xp: 'XP Total',
       dailyGoal: 'Meta diaria',
@@ -191,7 +191,7 @@ const translations = {
       profile: 'Profile',
     },
     home: {
-      greeting: 'Hello, {name}! 🔥',
+      greeting: 'Hello, {name}! ',
       streak: 'Streak',
       xp: 'Total XP',
       dailyGoal: 'Daily goal',
