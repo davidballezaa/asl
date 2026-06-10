@@ -7,7 +7,7 @@ export const colors = {
   blue: '#42C2F5',
   color_bot: '#009AE6',
 
-  secondary: '#F4A261',
+  secondary: '#6FD4FC',
   success: '#22C55E',
   error: '#EF4444',
 
