@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   logoImage: {
-    width: 250,
-    height: 250
+    width: 300,
+    height: 300
   }
 });

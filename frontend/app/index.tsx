@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import {
+  Image,
   Animated,
   ScrollView,
   StyleSheet,
@@ -17,18 +18,6 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { useLang } from '@/context/LangContext';
-
-const HAND_COLORS = [
-  colors.primary,
-  colors.secondary,
-  colors.success,
-  colors.error,
-  colors.purple,
-  colors.cyan,
-  colors.pink,
-  '#F59E0B',
-  colors.border,
-];
 
 const HAND_ROTATIONS = [-4, 0, 4, -4, 0, 4, -4, 0, 4];
 
@@ -130,19 +119,18 @@ export default function LandingScreen() {
               ]}
             >
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>✨ {i18n.landing.tagline}</Text>
+                <Text style={styles.badgeText}>{i18n.landing.tagline}</Text>
               </View>
 
               <View style={styles.titleRow}>
                 <Text style={styles.title}>{i18n.landing.title}</Text>
-                <Text style={styles.titleHand}>🤟</Text>
               </View>
 
               <Text style={styles.subtitle}>{i18n.landing.subtitle}</Text>
 
               <View style={styles.actions}>
                 <NBButton
-                  title={`${i18n.landing.cta} →`}
+                  title={`${i18n.landing.cta}`}
                   variant="primary"
                   onPress={() =>
                     router.push(isSignedIn ? '/(app)/home' : '/register')
@@ -171,25 +159,24 @@ export default function LandingScreen() {
                 ]}
               >
                 <View style={styles.handGrid}>
-                  {HAND_COLORS.map((bg, i) => (
+                  {HANDS.map((tile, i) => (
                     <View
                       key={i}
                       style={[
                         styles.gridCell,
                         {
-                          backgroundColor: bg,
+                          backgroundColor: tile.color,
                           transform: [{ rotate: `${HAND_ROTATIONS[i]}deg` }],
                         },
                       ]}
                     >
-                      <Text
+                      <Image
+                        source={tile.image}
                         style={[
-                          styles.gridHand,
+                          styles.gridImage,
                           i === 8 && styles.gridHandLight,
                         ]}
-                      >
-                        🤟
-                      </Text>
+                      />
                     </View>
                   ))}
                 </View>
@@ -300,16 +287,18 @@ const styles = StyleSheet.create({
   },
   gridSide: {
     flex: 1,
-    minHeight: 360,
+    minHeight: 640,
+  alignItems: 'center',
+  justifyContent: 'center',
   },
   handGrid: {
     borderColor: colors.border,
-    borderRadius: 16,
+    borderRadius: 24,
     borderWidth: 4,
     flexDirection: 'row',
     flexWrap: 'wrap',
     overflow: 'hidden',
-    width: 300,
+    width: 590,
   },
   gridCell: {
     alignItems: 'center',
@@ -373,4 +362,48 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
+  gridImage: {
+    width: '80%',
+    height: '85%',
+    resizeMode: 'contain',
+  }
 });
+
+const HANDS = [
+  {
+    color: '#2DE6E0',
+    image : require('../../frontend/assets/alfabeto_manos/a.png'),
+  },
+  {
+    color: '#4DE63D',
+    image : require('../../frontend/assets/alfabeto_manos/l.png'),
+  },
+  {
+    color: '#E64403',
+    image : require('../../frontend/assets/alfabeto_manos/o.png'),
+  },
+  {
+    color: '#E67E17',
+    image : require('../../frontend/assets/alfabeto_manos/s.png'),
+  },
+  {
+    color: '#931FE6',
+    image : require('../../frontend/assets/alfabeto_manos/t.png'),
+  },
+  {
+    color: '#E6AC00',
+    image : require('../../frontend/assets/alfabeto_manos/w.png'),
+  },
+  {
+    color: '#E65179',
+    image : require('../../frontend/assets/alfabeto_manos/v.png'),
+  },
+  {
+    color: '#F59E0B',
+    image : require('../../frontend/assets/alfabeto_manos/k.png'),
+  },
+  {
+    color: '#2E4BE6',
+    image : require('../../frontend/assets/alfabeto_manos/i.png'),
+  },
+]
