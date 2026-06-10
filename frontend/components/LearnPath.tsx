@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -17,6 +18,8 @@ import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
 import { getAllLessonIdsInOrder, getAllLessons } from '@/lib/mock-data';
 import { isLessonCompleted, isLessonLocked } from '@/lib/user-progress';
+import { getSignImageSource } from '@/lib/alphabet';
+
 // Fractions along the full track: left edge, center, right edge, center
 const ZIGZAG = [0, 0.5, 1, 0.5] as const;
 
@@ -75,6 +78,17 @@ function usePathMetrics(pathWidth: number) {
   }, [pathWidth]);
 }
 
+function getLessonPreviewSign(lesson: {
+  title?: string;
+  exercises?: Array<{ signWord?: string | null }>;
+}) {
+  const exerciseSign = lesson.exercises?.find(
+    (item) => Boolean(item?.signWord),
+  )?.signWord;
+
+  return exerciseSign ?? lesson.title ?? '';
+}
+
 export function LearnPath() {
   const router = useRouter();
   const { i18n } = useLang();
@@ -83,8 +97,8 @@ export function LearnPath() {
   const layoutWidth = pathWidth || screenWidth - 32;
   const metrics = usePathMetrics(layoutWidth);
   const { me, units } = useAppData();
-  const allLessons = useMemo(() => getAllLessons(units), [units]);
-  const allLessonIds = useMemo(() => getAllLessonIdsInOrder(units), [units]);
+  const allLessons = useMemo(() => getAllLessons(units) ?? [], [units]);
+  const allLessonIds = useMemo(() => getAllLessonIdsInOrder(units) ?? [], [units]);
   const completedLessonIds = me?.progress.completedLessonIds ?? [];
   const activeLessonId = me?.gamification.activeLessonId ?? 'lesson-1';
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -153,6 +167,8 @@ export function LearnPath() {
             allLessonIds,
           );
           const nodeState = getNodeState(completed, isActive, locked);
+          const firstSignWord = getLessonPreviewSign(lesson);
+          const nodeSignSource = getSignImageSource(firstSignWord);
 
           return (
             <View key={lesson.id} style={[styles.row, { height: rowHeight }]}>
@@ -205,19 +221,43 @@ export function LearnPath() {
                       },
                     ]}
                   >
+                  {nodeState === 'locked' ?(
                     <Text
-                      style={[
-                        styles.nodeIcon,
-                        compact && styles.nodeIconCompact,
-                        nodeState === 'locked' && styles.nodeIconLocked,
-                      ]}
-                    >
-                      {nodeState === 'completed'
-                        ? '✓'
-                        : nodeState === 'current'
-                          ? '▶'
-                          : '🔒'}
-                    </Text>
+                    style={[
+                      styles.nodeSignImage,
+                      compact && styles.nodeSignImageCompact,
+                      styles.nodeIconLocked,
+                    ]}
+                  >
+                    🔒
+                  </Text>
+                ): nodeSignSource? (
+                  <>
+                    <Image
+                    source={nodeSignSource}
+                    resizeMode='contain'
+                    style={[
+                      styles.nodeSignImage,
+                      compact && styles.nodeSignImage
+                    ]}
+                  />
+                    {nodeState === 'completed' && (
+                      <View style={styles.doneBadge}>
+                        <Text style={styles.doneBadgeText}>✓</Text>
+                      </View>
+                    )}
+                  </>
+                  ) : (
+                    <Text
+                    style={[
+                      styles.nodeIcon,
+                      compact && styles.nodeIconCompact,
+                    ]}
+                  >
+                    {nodeState === 'completed'?  '✓' : '▶'}
+                </Text>
+              )}
+              
                   </Animated.View>
                 </Pressable>
 
@@ -297,6 +337,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 4,
     justifyContent: 'center',
+    overflow : 'visible',
   },
   nodeCurrent: {
     backgroundColor: colors.primary,
@@ -336,6 +377,14 @@ const styles = StyleSheet.create({
   nodeIconLocked: {
     color: '#94A3B8',
     fontSize: 18,
+  },
+  nodeSignImage: {
+    height : 46,
+    width : 46
+  },
+  nodeSignImageCompact: {
+    height : 36,
+    width : 36
   },
   labelCard: {
     alignItems: 'center',
@@ -392,4 +441,23 @@ const styles = StyleSheet.create({
   pathFooter: {
     height: 100,
   },
+  doneBadge: {
+  alignItems: 'center',
+  backgroundColor: colors.success,
+  borderColor: colors.border,
+  borderRadius: 12,
+  borderWidth: 2,
+  bottom: -2,
+  height: 24,
+  justifyContent: 'center',
+  position: 'absolute',
+  right: -2,
+  width: 24,
+},
+
+doneBadgeText: {
+  color: '#FFFFFF',
+  fontFamily: 'Nunito_800ExtraBold',
+  fontSize: 14,
+},
 });

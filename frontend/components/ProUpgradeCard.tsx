@@ -25,7 +25,7 @@ export function ProUpgradeCard({
     return (
       <NBCard style={[styles.card, compact && styles.cardCompact]}>
         <View style={styles.proBadge}>
-          <Text style={styles.proBadgeText}>✨ {i18n.subscription.proBadge}</Text>
+          <Text style={styles.proBadgeText}> {i18n.subscription.proBadge}</Text>
         </View>
         <Text style={styles.proTitle}>{i18n.subscription.proActive}</Text>
         <Text style={styles.proDesc}>{i18n.subscription.proActiveDesc}</Text>

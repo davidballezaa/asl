@@ -27,7 +27,7 @@ export function ProfileHeader({
 
       {isPro ? (
         <View style={[styles.planBadge, styles.proBadge]}>
-          <Text style={styles.proBadgeText}>✨ {i18n.subscription.proBadge}</Text>
+          <Text style={styles.proBadgeText}> {i18n.subscription.proBadge}</Text>
         </View>
       ) : (
         <Pressable
