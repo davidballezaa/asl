@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NBButton } from '@/components/NBButton';
@@ -28,11 +28,12 @@ export function Navbar() {
           onPress={() => router.push(isSignedIn ? '/(app)/home' : '/')}
           style={styles.brand}
         >
-          <View style={styles.brandIcon}>
-            <Text style={styles.brandEmoji}>🤟</Text>
+          <View>
+            <Image source={require("../../frontend/assets/icons/hurron.png")}
+              style={styles.logoImage}/>
           </View>
           <Text style={styles.brandText}>
-            ASL<Text style={styles.brandAccent}>Academy</Text>
+            Signi<Text style={styles.brandAccent}>Academy</Text>
           </Text>
         </Pressable>
 
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderBottomColor: colors.border,
     borderBottomWidth: 4,
-    paddingBottom: 12,
+    paddingBottom: 15,
     paddingHorizontal: 16,
   },
   inner: {
@@ -122,18 +123,19 @@ const styles = StyleSheet.create({
   },
   brandIcon: {
     alignItems: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.logo,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 999,
     borderWidth: 4,
-    height: 40,
+    height: 60,
     justifyContent: 'center',
     shadowColor: colors.border,
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
-    width: 40,
+    width: 60,
+    overflow: 'hidden'
   },
   brandEmoji: {
     fontSize: 18,
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   brandAccent: {
-    color: colors.primary,
+    color: colors.logo,
   },
   actions: {
     alignItems: 'center',
@@ -238,4 +240,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
   },
+  logoImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain'  
+  }
 });

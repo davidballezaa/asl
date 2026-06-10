@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View , Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Navbar } from '@/components/Navbar';
@@ -51,8 +51,9 @@ export default function LoginScreen() {
       >
         <ScreenContainer size="auth">
           <NBCard style={styles.card}>
-            <View style={[styles.iconCircle, { backgroundColor: colors.primary }]}>
-              <Text style={styles.iconText}>🤟</Text>
+            <View>
+              <Image source={require("../assets/icons/Logoapp.png")}
+              style={styles.logoImage}/>
             </View>
 
             <Text style={styles.title}>{i18n.login.title}</Text>
@@ -176,4 +177,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: 'underline',
   },
+    logoImage: {
+    width: 300,
+    height: 300
+  }
 });
