@@ -1,5 +1,5 @@
 
-const HANDS = [
+export const hands = [
   {
     a : require('../../frontend/assets/alfabeto_manos/a.png'),
   },
