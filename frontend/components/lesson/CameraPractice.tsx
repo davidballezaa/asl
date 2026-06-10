@@ -14,8 +14,8 @@ import { NBCard } from '@/components/NBCard';
 import { colors } from '@/constants/colors';
 import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
-import { playCorrectFeedback, playWrongFeedback } from '@/lib/feedback';
 import { recognizeSign } from '@/lib/api/signs';
+import { playCorrectFeedback, playWrongFeedback } from '@/lib/feedback';
 import { t } from '@/lib/i18n';
 import type { Exercise } from '@/lib/mock-data';
 
@@ -23,22 +23,30 @@ type CameraPracticeProps = {
   exercise: Exercise;
   lessonId: string;
   onSuccess: () => void;
+  onSkip: () => void;
+  maxAttempts?: number;
 };
 
 export function CameraPractice({
   exercise,
   lessonId,
   onSuccess,
+  onSkip,
+  maxAttempts = 3,
 }: CameraPracticeProps) {
   const { i18n } = useLang();
   const { refreshMe } = useAppData();
   const [permission, requestPermission] = useCameraPermissions();
+
   const [status, setStatus] = useState<'idle' | 'scanning' | 'result'>('idle');
   const [resultMessage, setResultMessage] = useState('');
   const [success, setSuccess] = useState(false);
-  const cameraRef = useRef<CameraView>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [cameraLocked, setCameraLocked] = useState(false);
 
+  const cameraRef = useRef<CameraView>(null);
   const bounceAnim = useRef(new Animated.Value(0.5)).current;
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (permission && !permission.granted) {
@@ -46,8 +54,30 @@ export function CameraPractice({
     }
   }, [permission, requestPermission]);
 
+  useEffect(() => {
+    setStatus('idle');
+    setResultMessage('');
+    setSuccess(false);
+    setAttempts(0);
+    setCameraLocked(false);
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+  }, [exercise.id]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
+
   const showFeedback = () => {
     bounceAnim.setValue(0.5);
+
     Animated.spring(bounceAnim, {
       toValue: 1,
       friction: 4,
@@ -56,22 +86,48 @@ export function CameraPractice({
     }).start();
   };
 
+  const registerFailedAttempt = () => {
+    setAttempts((currentAttempts) => {
+      const nextAttempts = currentAttempts + 1;
+
+      if (nextAttempts >= maxAttempts) {
+        setCameraLocked(true);
+      }
+
+      return nextAttempts;
+    });
+  };
+
+  const resetForRetry = () => {
+    if (cameraLocked) return;
+
+    setStatus('idle');
+    setResultMessage('');
+    setSuccess(false);
+  };
+
   const handleCapture = async () => {
+    if (status === 'scanning' || cameraLocked) return;
+
     setStatus('scanning');
+
     try {
       const photo = await cameraRef.current?.takePictureAsync({
         quality: 0.7,
         skipProcessing: true,
       });
+
       if (!photo?.uri) {
         throw new Error('No photo captured');
       }
+
       const result = await recognizeSign({
         imageUri: photo.uri,
         expectedSign: exercise.signWord,
         lessonId,
         exerciseId: exercise.id,
       });
+
       setResultMessage(
         result.success ? i18n.lesson.signSuccess : i18n.lesson.signMiss,
       );
@@ -80,16 +136,25 @@ export function CameraPractice({
       showFeedback();
 
       if (result.success) {
+        setAttempts(0);
         await refreshMe();
         await playCorrectFeedback();
-      } else {
-        await playWrongFeedback();
+
+        successTimerRef.current = setTimeout(() => {
+          onSuccess();
+        }, 650);
+
+        return;
       }
+
+      registerFailedAttempt();
+      await playWrongFeedback();
     } catch {
       setResultMessage(i18n.lesson.signMiss);
       setSuccess(false);
       setStatus('result');
       showFeedback();
+      registerFailedAttempt();
       await playWrongFeedback();
     }
   };
@@ -106,10 +171,17 @@ export function CameraPractice({
     return (
       <View style={styles.centered}>
         <Text style={styles.message}>{i18n.lesson.cameraPermission}</Text>
+
         <NBButton
           title={i18n.lesson.allowCamera}
           variant="primary"
           onPress={requestPermission}
+        />
+
+        <NBButton
+          title="Continuar sin cámara por ahora"
+          variant="secondary"
+          onPress={onSkip}
         />
       </View>
     );
@@ -123,18 +195,33 @@ export function CameraPractice({
       keyboardShouldPersistTaps="handled"
     >
       <Text style={styles.prompt}>{i18n.lesson.practiceCamera}</Text>
+
       <Text style={styles.title}>
         {t(i18n, 'lesson.sign', { word: exercise.signWord })}
       </Text>
+
       <Text style={styles.hint}>{exercise.signDescription}</Text>
+
+      <Text style={styles.attemptsText}>
+        Intentos: {attempts}/{maxAttempts}
+      </Text>
 
       <NBCard style={styles.cameraCard}>
         <View style={styles.cameraWrap}>
           <CameraView ref={cameraRef} style={styles.camera} facing="front" />
+
           {status === 'scanning' && (
             <View style={styles.overlay}>
               <ActivityIndicator color="#fff" size="large" />
               <Text style={styles.overlayText}>{i18n.lesson.scanning}</Text>
+            </View>
+          )}
+
+          {cameraLocked && (
+            <View style={styles.overlay}>
+              <Text style={styles.overlayText}>
+                Llegamos al límite de intentos.
+              </Text>
             </View>
           )}
         </View>
@@ -162,16 +249,23 @@ export function CameraPractice({
         </Animated.View>
       )}
 
+      {cameraLocked && (
+        <Text style={styles.helpText}>
+          No pasa nada. Practiquemos esta seña con selección múltiple.
+        </Text>
+      )}
+
       <View style={styles.actions}>
         {status !== 'result' && (
           <NBButton
             title={i18n.lesson.checkSign}
             variant="primary"
             loading={status === 'scanning'}
-            disabled={status === 'scanning'}
+            disabled={status === 'scanning' || cameraLocked}
             onPress={() => void handleCapture()}
           />
         )}
+
         {status === 'result' && success && (
           <NBButton
             title={i18n.lesson.continue}
@@ -179,13 +273,24 @@ export function CameraPractice({
             onPress={onSuccess}
           />
         )}
-        {status === 'result' && !success && (
+
+        {status === 'result' && !success && !cameraLocked && (
           <NBButton
             title={i18n.lesson.tryAgain}
             variant="secondary"
-            onPress={() => setStatus('idle')}
+            onPress={resetForRetry}
           />
         )}
+
+        <NBButton
+          title={
+            cameraLocked
+              ? 'Practicar sin cámara'
+              : 'Continuar sin cámara por ahora'
+          }
+          variant="secondary"
+          onPress={onSkip}
+        />
       </View>
     </ScrollView>
   );
@@ -227,6 +332,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  attemptsText: {
+    color: colors.muted,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  helpText: {
+    color: colors.muted,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
   message: {
     color: colors.text,
     fontFamily: 'Nunito_600SemiBold',
@@ -261,6 +379,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Nunito_700Bold',
     fontSize: 16,
+    textAlign: 'center',
   },
   resultBox: {
     borderRadius: 12,
