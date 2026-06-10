@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { NBButton } from '@/components/NBButton';
@@ -26,6 +26,12 @@ export function MultipleChoiceQuiz({
   const [correctAnswer, setCorrectAnswer] = useState(
     exercise.correctAnswer ?? exercise.signWord,
   );
+  useEffect(() => {
+    setSelected(null);
+    setRevealed(false);
+    setCorrectAnswer(exercise.correctAnswer ?? exercise.signWord);
+  }, [exercise.id, exercise.correctAnswer, exercise.signWord]);
+
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const popAnim = useRef(new Animated.Value(1)).current;
 
