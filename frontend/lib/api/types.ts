@@ -8,6 +8,7 @@ export type AuthUser = {
   id: string;
   name: string;
   email: string;
+  role?: 'user' | 'admin';
 };
 
 export type AuthResponse = {
@@ -20,7 +21,6 @@ export type GamificationState = {
   level: LevelProgress;
   challenges: ChallengeProgress[];
   activeLessonId: string;
-  hearts: number;
   streak: number;
   completedLessons: number;
   totalLessons: number;
@@ -46,7 +46,6 @@ export type LessonResponse = {
 export type ExerciseAttemptResponse = {
   correct: boolean;
   correctAnswer?: string;
-  heartsRemaining?: number;
 };
 
 export type CompleteLessonResponse = {

@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-import json
-from uuid import UUID
+from datetime import date
 
 from app.domain.entities.curriculum import Exercise, Lesson, Unit
-from app.domain.entities.user import User, UserProfile, UserProgress
+from app.domain.entities.subscription import Subscription, SubscriptionPlan
+from app.domain.entities.user import User, UserProfile
 from app.infrastructure.db.sql.models import (
     ExerciseModel,
     LessonModel,
+    SubscriptionModel,
+    SubscriptionPlanModel,
     UnitModel,
     UserModel,
     UserProfileModel,
-    UserProgressModel,
 )
 
 
@@ -22,6 +23,7 @@ def user_from_model(m: UserModel) -> User:
         name=m.name,
         password_hash=m.password_hash,
         created_at=m.created_at,
+        role=m.role,
     )
 
 
@@ -30,27 +32,39 @@ def profile_from_model(m: UserProfileModel) -> UserProfile:
         user_id=m.user_id,
         username=m.username,
         initials=m.initials,
-        photo_url=m.photo_url,
     )
 
 
-def progress_from_model(m: UserProgressModel) -> UserProgress:
-    return UserProgress(
+def subscription_plan_from_model(m: SubscriptionPlanModel) -> SubscriptionPlan:
+    return SubscriptionPlan(
+        id=m.id,
+        name=m.name,
+        price_cents=m.price_cents,
+        currency=m.currency,
+        interval=m.billing_interval,
+        sort_order=m.sort_order,
+    )
+
+
+def subscription_from_model(m: SubscriptionModel) -> Subscription:
+    return Subscription(
         user_id=m.user_id,
-        lesson_xp=m.lesson_xp,
-        hearts=m.hearts,
-        lessons_completed_today=m.lessons_completed_today,
-        lessons_today_date=m.lessons_today_date,
-        camera_passes=m.camera_passes,
-        letters_learned=m.letters_learned,
-        completed_lesson_ids=json.loads(m.completed_lesson_ids),
-        claimed_challenge_ids=json.loads(m.claimed_challenge_ids),
-        practice_days=json.loads(m.practice_days),
+        plan_id=m.plan_id,
+        status=m.status,
+        stripe_customer_id=m.stripe_customer_id,
+        stripe_subscription_id=m.stripe_subscription_id,
+        current_period_end=m.current_period_end,
+        cancel_at_period_end=m.cancel_at_period_end,
     )
 
 
 def exercise_from_model(m: ExerciseModel) -> Exercise:
-    options = json.loads(m.options_json) if m.options_json else None
+    sorted_options = sorted(m.options, key=lambda option: option.sort_order)
+    options = [option.value for option in sorted_options] or None
+    correct_answer = next(
+        (option.value for option in sorted_options if option.is_correct),
+        None,
+    )
     return Exercise(
         id=m.id,
         type=m.type,
@@ -58,7 +72,8 @@ def exercise_from_model(m: ExerciseModel) -> Exercise:
         sign_description=m.sign_description,
         content_type=m.content_type,
         options=options,
-        correct_answer=m.correct_answer,
+        correct_answer=correct_answer,
+        image_url=m.image_url,
     )
 
 
@@ -92,17 +107,3 @@ def unit_from_model(m: UnitModel, include_exercises: bool = False) -> Unit:
         lessons=lessons,
         sort_order=m.sort_order,
     )
-
-
-def progress_to_model_fields(p: UserProgress) -> dict:
-    return {
-        "lesson_xp": p.lesson_xp,
-        "hearts": p.hearts,
-        "lessons_completed_today": p.lessons_completed_today,
-        "lessons_today_date": p.lessons_today_date,
-        "camera_passes": p.camera_passes,
-        "letters_learned": p.letters_learned,
-        "completed_lesson_ids": json.dumps(p.completed_lesson_ids),
-        "claimed_challenge_ids": json.dumps(p.claimed_challenge_ids),
-        "practice_days": json.dumps(p.practice_days),
-    }

@@ -10,6 +10,7 @@ export type Exercise = {
   contentType?: ContentType;
   options?: string[];
   correctAnswer?: string;
+  imageUrl?: string;
 };
 
 export type Lesson = {

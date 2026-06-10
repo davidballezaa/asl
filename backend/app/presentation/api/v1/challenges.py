@@ -17,18 +17,6 @@ from app.presentation.deps import get_current_user_id, get_uow
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
 
-@router.get("")
-async def list_challenges(
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
-    uow: Annotated[UnitOfWork, Depends(get_uow)],
-):
-    service = ChallengeService(uow)
-    try:
-        return await service.list_challenges(user_id)
-    except ChallengeNotFoundError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Progress not found")
-
-
 @router.post("/{challenge_id}/claim")
 async def claim_challenge(
     challenge_id: str,

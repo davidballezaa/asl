@@ -91,34 +91,6 @@ export type LevelProgress = {
   progressPercent: number;
 };
 
-export function getLevelProgress(totalXp: number): LevelProgress {
-  let current = levelTiers[0];
-  let next: LevelTier | null = levelTiers[1] ?? null;
-
-  for (let i = levelTiers.length - 1; i >= 0; i--) {
-    if (totalXp >= levelTiers[i].minXp) {
-      current = levelTiers[i];
-      next = levelTiers[i + 1] ?? null;
-      break;
-    }
-  }
-
-  const xpIntoLevel = totalXp - current.minXp;
-  const xpForNextLevel = next ? next.minXp - current.minXp : 0;
-  const progressPercent = next
-    ? Math.min(100, Math.round((xpIntoLevel / xpForNextLevel) * 100))
-    : 100;
-
-  return {
-    current,
-    next,
-    totalXp,
-    xpIntoLevel,
-    xpForNextLevel,
-    progressPercent,
-  };
-}
-
 export function isLevelUnlocked(level: number, totalXp: number): boolean {
   const tier = levelTiers.find((t) => t.level === level);
   return tier ? totalXp >= tier.minXp : false;

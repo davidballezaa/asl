@@ -26,7 +26,6 @@ class SQLProfileRepository:
             user_id=profile.user_id,
             username=profile.username,
             initials=profile.initials,
-            photo_url=profile.photo_url,
         )
         self._session.add(model)
         await self._session.flush()

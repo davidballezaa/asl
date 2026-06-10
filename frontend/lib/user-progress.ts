@@ -3,7 +3,6 @@ export type UserProgress = {
   lessonXp: number;
   lessonsCompletedToday: number;
   claimedChallengeIds: string[];
-  hearts: number;
 };
 
 export function getActiveLessonId(

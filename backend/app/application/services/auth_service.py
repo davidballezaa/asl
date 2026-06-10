@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from uuid import UUID
-
-from app.domain.entities.user import UserProfile, UserProgress
+from app.domain.entities.user import UserProfile
 from app.domain.ports.unit_of_work import UnitOfWork
 from app.infrastructure.auth.jwt import create_access_token
 from app.infrastructure.auth.password import hash_password, verify_password
@@ -40,14 +38,14 @@ class AuthService:
         if existing:
             raise EmailTakenError("Email already registered")
         user = await self._uow.users.create(email, name, hash_password(password))
+        if not user:
+            raise EmailTakenError("Email already registered")
         profile = UserProfile(
             user_id=user.id,
             username=_make_username(email),
             initials=_make_initials(name),
         )
         await self._uow.profiles.create(profile)
-        progress = UserProgress(user_id=user.id)
-        await self._uow.progress.create(progress)
         token = create_access_token(user.id)
         return token, {"id": str(user.id), "name": user.name, "email": user.email}
 
@@ -58,8 +56,3 @@ class AuthService:
         token = create_access_token(user.id)
         return token, {"id": str(user.id), "name": user.name, "email": user.email}
 
-    async def get_user_by_id(self, user_id: UUID) -> dict | None:
-        user = await self._uow.users.get_by_id(user_id)
-        if not user:
-            return None
-        return {"id": str(user.id), "name": user.name, "email": user.email}

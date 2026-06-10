@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import datetime
 from uuid import UUID
 
 
@@ -12,6 +12,11 @@ class User:
     name: str
     password_hash: str
     created_at: datetime
+    role: str = "user"
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == "admin"
 
 
 @dataclass
@@ -19,16 +24,14 @@ class UserProfile:
     user_id: UUID
     username: str
     initials: str
-    photo_url: str | None = None
 
 
 @dataclass
 class UserProgress:
     user_id: UUID
     lesson_xp: int = 0
-    hearts: int = 5
+    challenge_xp: int = 0
     lessons_completed_today: int = 0
-    lessons_today_date: date | None = None
     camera_passes: int = 0
     letters_learned: int = 0
     completed_lesson_ids: list[str] = field(default_factory=list)

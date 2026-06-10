@@ -251,7 +251,7 @@ export function CameraPractice({
 
       {cameraLocked && (
         <Text style={styles.helpText}>
-          No pasa nada. Practiquemos esta seña con selección múltiple.
+          No pasa nada. Puedes continuar sin cámara.
         </Text>
       )}
 

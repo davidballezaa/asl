@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { NBButton } from '@/components/NBButton';
@@ -6,7 +5,7 @@ import { NBCard } from '@/components/NBCard';
 import { SignIllustration } from '@/components/SignIllustration';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
-import { isProUser, upgradeToPro } from '@/lib/subscription';
+import { useSubscription } from '@/lib/subscription';
 import type { Exercise } from '@/lib/mock-data';
 
 type SignDemoProps = {
@@ -45,7 +44,7 @@ function YoutubeEmbed({ videoId }: { videoId: string }) {
 
 export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
   const { i18n } = useLang();
-  const [isPro, setIsPro] = useState(isProUser());
+  const { isPro, upgrade } = useSubscription();
 
   const displayLetter =
     exercise.contentType === 'letter'
@@ -53,8 +52,7 @@ export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
       : exercise.signWord.charAt(0).toUpperCase();
 
   const handleUpgrade = () => {
-    upgradeToPro();
-    setIsPro(true);
+    void upgrade();
   };
 
   return (
@@ -76,6 +74,7 @@ export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
             word={exercise.signWord}
             size="lg"
             variant={exercise.contentType ?? 'letter'}
+            imageUrl={exercise.imageUrl}
           />
         </View>
 

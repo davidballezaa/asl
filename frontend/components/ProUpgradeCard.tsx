@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
-import { isProUser, upgradeToPro } from '@/lib/subscription';
+import { useSubscription } from '@/lib/subscription';
 
 type ProUpgradeCardProps = {
   compact?: boolean;
@@ -19,7 +18,7 @@ export function ProUpgradeCard({
   onUpgraded,
 }: ProUpgradeCardProps) {
   const { i18n } = useLang();
-  const [isPro, setIsPro] = useState(isProUser());
+  const { isPro, isUpdating, upgrade } = useSubscription();
 
   if (isPro) {
     return (
@@ -56,10 +55,12 @@ export function ProUpgradeCard({
       <NBButton
         title={i18n.subscription.upgradeCta}
         variant="secondary"
+        loading={isUpdating}
         onPress={() => {
-          upgradeToPro();
-          setIsPro(true);
-          onUpgraded?.();
+          void (async () => {
+            await upgrade();
+            onUpgraded?.();
+          })();
         }}
       />
     </NBCard>

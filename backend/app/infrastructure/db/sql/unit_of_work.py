@@ -5,8 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.infrastructure.db.sql.repositories.curriculum_repository import (
     SQLCurriculumRepository,
 )
+from app.infrastructure.db.sql.repositories.metrics_repository import (
+    SQLMetricsRepository,
+)
 from app.infrastructure.db.sql.repositories.profile_repository import SQLProfileRepository
 from app.infrastructure.db.sql.repositories.progress_repository import SQLProgressRepository
+from app.infrastructure.db.sql.repositories.subscription_repository import (
+    SQLSubscriptionRepository,
+)
 from app.infrastructure.db.sql.repositories.user_repository import SQLUserRepository
 
 
@@ -16,7 +22,9 @@ class SQLUnitOfWork:
         self.users = SQLUserRepository(session)
         self.profiles = SQLProfileRepository(session)
         self.progress = SQLProgressRepository(session)
+        self.subscriptions = SQLSubscriptionRepository(session)
         self.curriculum = SQLCurriculumRepository(session)
+        self.metrics = SQLMetricsRepository(session)
 
     async def commit(self) -> None:
         await self._session.commit()

@@ -2,7 +2,6 @@ export type UserProfile = {
   name: string;
   username: string;
   initials: string;
-  photoUrl?: string;
   practiceDays: string[];
 };
 

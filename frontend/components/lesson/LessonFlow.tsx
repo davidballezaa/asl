@@ -13,7 +13,7 @@ import { SignDemo } from '@/components/lesson/SignDemo';
 import { colors } from '@/constants/colors';
 import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
-import { completeLesson } from '@/lib/api/lessons';
+import { completeLesson, skipCameraExercise } from '@/lib/api/lessons';
 import { t } from '@/lib/i18n';
 import type { Exercise, Lesson } from '@/lib/mock-data';
 
@@ -21,8 +21,6 @@ type LessonFlowProps = {
   lesson: Lesson;
   lessonId: string;
 };
-
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function shuffle<T>(items: T[]) {
   const copy = [...items];
@@ -33,37 +31,6 @@ function shuffle<T>(items: T[]) {
   }
 
   return copy;
-}
-
-function normalizeLetterAnswer(value: string) {
-  return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
-}
-
-function createLetterOptions(correctAnswer: string) {
-  const correct = normalizeLetterAnswer(correctAnswer);
-  const wrongOptions = shuffle(ALPHABET.filter((letter) => letter !== correct));
-
-  return shuffle([correct, ...wrongOptions.slice(0, 3)]);
-}
-
-function createFallbackQuiz(exercise: Exercise, index: number): Exercise {
-  const rawAnswer = String(exercise.correctAnswer ?? exercise.signWord);
-  const isLetter = (exercise.contentType ?? 'letter') === 'letter';
-
-  const correctAnswer = isLetter
-    ? normalizeLetterAnswer(rawAnswer)
-    : rawAnswer.toUpperCase();
-
-  return {
-    ...exercise,
-    id: `${exercise.id}-fallback-quiz-${index}`,
-    type: 'quiz',
-    correctAnswer,
-    options: exercise.options?.length
-      ? exercise.options
-      : createLetterOptions(correctAnswer),
-    contentType: exercise.contentType ?? 'letter',
-  } as Exercise;
 }
 
 function buildRandomLessonRun(exercises: Exercise[]) {
@@ -143,16 +110,10 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
       return;
     }
 
-    const fallbackQuiz = createFallbackQuiz(currentExercise, step);
-
-    setRunExercises((currentRun) => [
-      ...currentRun.slice(0, step + 1),
-      fallbackQuiz,
-      ...currentRun.slice(step + 1),
-    ]);
-
-    setStep((currentStep) => currentStep + 1);
-  }, [goNext, runExercises, step]);
+    void skipCameraExercise(lessonId, currentExercise.id)
+      .then(() => refreshMe())
+      .finally(goNext);
+  }, [goNext, lessonId, refreshMe, runExercises, step]);
 
   if (finished) {
     return (

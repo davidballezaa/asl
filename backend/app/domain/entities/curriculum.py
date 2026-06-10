@@ -12,6 +12,7 @@ class Exercise:
     content_type: str | None = None
     options: list[str] | None = None
     correct_answer: str | None = None
+    image_url: str | None = None
 
 
 @dataclass
