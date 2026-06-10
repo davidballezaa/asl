@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
+import { Sitemap, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Navbar } from '@/components/Navbar';
@@ -44,8 +44,9 @@ export default function RegisterScreen() {
       >
         <ScreenContainer size="auth">
           <NBCard style={styles.card}>
-            <View style={[styles.iconCircle, { backgroundColor: colors.primary }]}>
-              <Text style={styles.iconText}>🤟</Text>
+            <View>
+              <Image source={require("../../frontend/assets/icons/Logoapp.png")}
+              style={styles.logoImage}/>
             </View>
 
             <Text style={styles.title}>{i18n.register.title}</Text>
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 20,
     borderWidth: 4,
-    height: 64,
+    height: 85,
     justifyContent: 'center',
     marginBottom: 4,
     shadowColor: colors.border,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 6,
-    width: 64,
+    width: 85,
   },
   iconText: {
     fontSize: 28,
@@ -182,4 +183,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: 'underline',
   },
+  logoImage: {
+    width: 250,
+    height: 250
+  }
 });
