@@ -179,7 +179,7 @@ export function CameraPractice({
         />
 
         <NBButton
-          title="Continuar sin cámara por ahora"
+          title={i18n.lesson.continue}
           variant="secondary"
           onPress={onSkip}
         />
@@ -219,15 +219,13 @@ export function CameraPractice({
 
           {cameraLocked && (
             <View style={styles.overlay}>
-              <Text style={styles.overlayText}>
-                Llegamos al límite de intentos.
-              </Text>
+              <Text style={styles.overlayText}>{i18n.lesson.attemptsLimit}</Text>
             </View>
           )}
         </View>
       </NBCard>
 
-      {status === 'result' && (
+      {status === 'result' && !cameraLocked && (
         <Animated.View
           style={[
             styles.resultBox,
@@ -247,12 +245,6 @@ export function CameraPractice({
             {resultMessage}
           </Text>
         </Animated.View>
-      )}
-
-      {cameraLocked && (
-        <Text style={styles.helpText}>
-          No pasa nada. Puedes continuar sin cámara.
-        </Text>
       )}
 
       <View style={styles.actions}>
@@ -282,15 +274,13 @@ export function CameraPractice({
           />
         )}
 
-        <NBButton
-          title={
-            cameraLocked
-              ? 'Practicar sin cámara'
-              : 'Continuar sin cámara por ahora'
-          }
-          variant="secondary"
-          onPress={onSkip}
-        />
+        {cameraLocked && (
+          <NBButton
+            title={i18n.lesson.continue}
+            variant="primary"
+            onPress={onSkip}
+          />
+        )}
       </View>
     </ScrollView>
   );
@@ -336,13 +326,6 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontFamily: 'Nunito_700Bold',
     fontSize: 14,
-    textAlign: 'center',
-  },
-  helpText: {
-    color: colors.muted,
-    fontFamily: 'Nunito_700Bold',
-    fontSize: 15,
-    lineHeight: 22,
     textAlign: 'center',
   },
   message: {

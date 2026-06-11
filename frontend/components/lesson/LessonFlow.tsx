@@ -16,27 +16,12 @@ import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
 import { completeLesson, skipCameraExercise } from '@/lib/api/lessons';
 import { t } from '@/lib/i18n';
-import type { Exercise, Lesson } from '@/lib/mock-data';
+import type { Lesson } from '@/lib/mock-data';
 
 type LessonFlowProps = {
   lesson: Lesson;
   lessonId: string;
 };
-
-function shuffle<T>(items: T[]) {
-  const copy = [...items];
-
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
-  }
-
-  return copy;
-}
-
-function buildRandomLessonRun(exercises: Exercise[]) {
-  return shuffle(exercises);
-}
 
 export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
   const router = useRouter();
@@ -47,9 +32,7 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     return lesson.exercises.map((exercise) => exercise.id).join('|');
   }, [lesson.exercises]);
 
-  const [runExercises, setRunExercises] = useState<Exercise[]>(() =>
-    buildRandomLessonRun(lesson.exercises),
-  );
+  const exercises = lesson.exercises;
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const [xpEarned, setXpEarned] = useState(lesson.xpReward);
@@ -62,14 +45,13 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     finishingRef.current = false;
     trophyScale.setValue(0.5);
 
-    setRunExercises(buildRandomLessonRun(lesson.exercises));
     setStep(0);
     setFinished(false);
     setXpEarned(lesson.xpReward);
   }, [lessonId, exerciseSignature, lesson.exercises, lesson.xpReward, trophyScale]);
 
-  const exercise = runExercises[step];
-  const total = runExercises.length;
+  const exercise = exercises[step];
+  const total = exercises.length;
 
   const finishLesson = useCallback(() => {
     if (finishingRef.current) return;
@@ -95,14 +77,14 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
 
   const goNext = useCallback(() => {
     setStep((currentStep) => {
-      if (currentStep + 1 >= runExercises.length) {
+      if (currentStep + 1 >= exercises.length) {
         finishLesson();
         return currentStep;
       }
 
       return currentStep + 1;
     });
-  }, [finishLesson, runExercises.length]);
+  }, [exercises.length, finishLesson]);
 
   const leaveLesson = useCallback(() => {
     router.back();
@@ -122,7 +104,7 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
   }, [leaveLesson]);
 
   const skipCameraPractice = useCallback(() => {
-    const currentExercise = runExercises[step];
+    const currentExercise = exercises[step];
 
     if (!currentExercise || currentExercise.type !== 'camera') {
       goNext();
@@ -132,7 +114,7 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     void skipCameraExercise(lessonId, currentExercise.id)
       .then(() => refreshMe())
       .finally(goNext);
-  }, [goNext, lessonId, refreshMe, runExercises, step]);
+  }, [exercises, goNext, lessonId, refreshMe, step]);
 
   if (finished) {
     return (
