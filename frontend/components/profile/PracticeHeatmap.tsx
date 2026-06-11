@@ -89,7 +89,7 @@ export function PracticeHeatmap({ practiceDays }: PracticeHeatmapProps) {
           style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}
           accessibilityLabel={i18n.profile.prevMonth}
         >
-          <Text style={styles.navBtnText}></Text>
+          <Text style={styles.navBtnText}>{'‹'}</Text>
         </Pressable>
         <Text style={styles.monthLabel}>{monthLabel}</Text>
         <Pressable
@@ -102,7 +102,7 @@ export function PracticeHeatmap({ practiceDays }: PracticeHeatmapProps) {
           ]}
           accessibilityLabel={i18n.profile.nextMonth}
         >
-          <Text style={[styles.navBtnText, !canGoNext && styles.navBtnTextDisabled]}>›</Text>
+          <Text style={[styles.navBtnText, !canGoNext && styles.navBtnTextDisabled]}>{'›'}</Text>
         </Pressable>
       </View>
 
