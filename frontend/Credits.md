@@ -62,3 +62,24 @@ This project uses visual assets from external sources for educational and protot
 - Source: Flaticon
 - Creator: heisenberg_gr
 - Link: <a href="https://www.flaticon.com/free-icons/accont" title="accont icons">Accont icons created by heisenberg_jr - Flaticon</a>
+
+## Challenges:
+- Source:
+- Creator:
+- Link: <a href="https://www.flaticon.com/free-icons/book" title="book icons">Book icons created by Smashicons - Flaticon</a>
+
+- Source:
+- Creator:
+- Link: <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Bahu Icons - Flaticon</a>
+
+-Source: 
+- Creator: 
+- Link:  <a href="https://www.flaticon.com/free-icons/camera" title="camera icons">Camera icons created by Freepik - Flaticon</a>
+
+- Source:
+- Creator:
+- Link: <a href="https://www.flaticon.com/free-icons/alphabet" title="alphabet icons">Alphabet icons created by Freepik - Flaticon</a>
+
+- Source:
+- Creator:
+- Link: <a href="https://www.flaticon.com/free-icons/trophy" title="trophy icons">Trophy icons created by Freepik - Flaticon</a>
