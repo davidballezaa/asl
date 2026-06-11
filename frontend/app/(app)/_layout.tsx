@@ -34,6 +34,7 @@ export default function AppLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: styles.tabBar,
+        tabBarPosition: 'top',
       }}
     >
       <Tabs.Screen
@@ -80,14 +81,15 @@ function ImageTabIcon({
   focused: boolean;
 }) {
   return (
-    <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
+    <View style={[styles.tabIconWrap, 
+      focused ? styles.tabIconWrapActive : styles.tabIconWrapInactive]}>
       <Image
         source={source}
         resizeMode="contain"
         style={[
           styles.tabIconImage,
           {
-            opacity: focused ? 1 : 0.55,
+            opacity: focused ? 1 : 0.65,
             transform: [{ scale: focused ? 1.08 : 1 }],
           },
         ]}
@@ -112,33 +114,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabBar: {
-    backgroundColor: colors.background,
-    borderTopColor: colors.border,
-    borderTopWidth: 4,
-    height: 60,
-    paddingBottom: 6,
-    paddingTop: 6,
+  backgroundColor: colors.color_bot,
+  borderBottomColor: colors.border,
+  borderBottomWidth: 4,
+  borderTopWidth: 0,
+  height: 66,
+  paddingBottom: 8,
+  paddingTop: 8,
   },
+
   tabIconWrap: {
     alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderRadius: 14,
+    borderWidth: 3,
     height: 44,
     justifyContent: 'center',
     width: 52,
   },
+
   tabIconWrapActive: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 3,
     shadowColor: colors.border,
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
+    transform: [{ translateY: 2 }],
+  },
+
+  tabIconWrapInactive: {
+    opacity: 0.8,
   },
   tabIconImage: {
-    height: 28,
-    width: 28,
+    height: 35,
+    width: 35,
   },
   tabEmoji: {
     fontSize: 24,
