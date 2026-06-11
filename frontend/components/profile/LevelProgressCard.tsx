@@ -7,7 +7,7 @@ import { LevelRoadmap } from '@/components/profile/LevelRoadmap';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
 import { t } from '@/lib/i18n';
-import type { LevelProgress } from '@/lib/progression';
+import { levelTiers, type LevelProgress } from '@/lib/progression';
 
 type LevelProgressCardProps = {
   level: LevelProgress;
@@ -17,6 +17,10 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
   const { i18n } = useLang();
   const [expanded, setExpanded] = useState(false);
 
+  const currentTier =
+    levelTiers.find((tier) => tier.level === level.current.level) ??
+    level.current;
+
   return (
     <NBCard style={styles.card}>
       <Pressable
@@ -24,21 +28,28 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
         style={styles.header}
       >
         <View style={styles.levelRow}>
-          <Image
-            source={level.current.medal}
-            resizeMode="contain"
-            accessibilityLabel={level.current.medalLabel}
-            style={styles.medalImage}
-          />
-          <View>
+          <View style={styles.medalBadge}>
+            <Image
+              key={currentTier.level}
+              source={currentTier.medal}
+              resizeMode="contain"
+              accessibilityLabel={currentTier.medalLabel}
+              style={styles.medalImage}
+            />
+          </View>
+
+          <View style={styles.levelTextBlock}>
             <Text style={styles.levelTitle}>
-              {t(i18n, 'profile.level', { level: level.current.level })} · {level.current.title}
+              {t(i18n, 'profile.level', { level: currentTier.level })} ·{' '}
+              {currentTier.title}
             </Text>
+
             <Text style={styles.medalLabel}>
-              {level.current.medalLabel}
+              {currentTier.medalLabel}
             </Text>
           </View>
         </View>
+
         <Text style={styles.chevron}>
           {expanded ? '▲' : '▼'}
         </Text>
@@ -49,6 +60,7 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
           <Text style={styles.xpText}>
             {t(i18n, 'profile.xpTotal', { xp: level.totalXp })}
           </Text>
+
           {level.next && (
             <Text style={styles.xpNext}>
               {t(i18n, 'profile.xpToNext', {
@@ -58,6 +70,7 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
             </Text>
           )}
         </View>
+
         <NBProgressBar
           progress={level.progressPercent}
           height={16}
@@ -66,7 +79,10 @@ export function LevelProgressCard({ level }: LevelProgressCardProps) {
       </View>
 
       {expanded && (
-        <LevelRoadmap currentLevel={level.current.level} totalXp={level.totalXp} />
+        <LevelRoadmap
+          currentLevel={currentTier.level}
+          totalXp={level.totalXp}
+        />
       )}
     </NBCard>
   );
@@ -83,8 +99,26 @@ const styles = StyleSheet.create({
   },
   levelRow: {
     alignItems: 'center',
+    flex: 1,
     flexDirection: 'row',
-    gap: 12,
+    gap: 14,
+  },
+  medalBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.border,
+    borderRadius: 24,
+    borderWidth: 3,
+    height: 64,
+    justifyContent: 'center',
+    width: 64,
+  },
+  medalImage: {
+    height: 48,
+    width: 48,
+  },
+  levelTextBlock: {
+    flex: 1,
   },
   levelTitle: {
     color: colors.text,
@@ -117,9 +151,5 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontFamily: 'Nunito_600SemiBold',
     fontSize: 12,
-  },
-  medalImage: {
-  height: 72,
-  width: 72,
   },
 });
