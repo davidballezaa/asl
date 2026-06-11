@@ -12,5 +12,8 @@ from app.infrastructure.recognition.stub_recognizer import StubSignRecognizer
 def get_sign_recognizer() -> SignRecognizer:
     settings = get_settings()
     if settings.recognizer_impl == "asl_rec":
-        return ASLRECRecognizer()
+        return ASLRECRecognizer(
+            url=settings.asl_rec_url,
+            timeout_seconds=settings.asl_rec_timeout_seconds,
+        )
     return StubSignRecognizer()

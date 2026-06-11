@@ -37,6 +37,8 @@ Use your LAN IP instead of `localhost` on a physical device.
 | `JWT_SECRET` | Auth token signing key |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `RECOGNIZER_IMPL` | `stub` or `asl_rec` |
+| `ASL_REC_URL` | Upstream recognizer endpoint, default `http://172.20.70.2:5000/predict` |
+| `ASL_REC_TIMEOUT_SECONDS` | HTTP timeout for upstream recognition requests |
 
 ## Production
 
@@ -64,4 +66,30 @@ pytest
 
 ## Sign recognition
 
-Implement `ASLRECRecognizer` in `app/infrastructure/recognition/asl_rec_adapter.py` (ASL-REC branch `origin/1-camera-video-capture`). Set `RECOGNIZER_IMPL=asl_rec`.
+The backend now supports an HTTP-backed recognizer adapter. Production should use:
+
+```env
+RECOGNIZER_IMPL=asl_rec
+ASL_REC_URL=http://172.20.70.2:5000/predict
+ASL_REC_TIMEOUT_SECONDS=10
+```
+
+The backend sends:
+
+```json
+{
+  "image_base64": "<base64 bytes>",
+  "expected_sign": "C"
+}
+```
+
+and expects:
+
+```json
+{
+  "predicted_sign": "C",
+  "confidence": 0.93,
+  "success": true,
+  "error": null
+}
+```

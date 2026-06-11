@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = 24
     cors_origins: str = "http://localhost:8081,http://localhost:19006,http://127.0.0.1:8081"
     recognizer_impl: str = "stub"
+    asl_rec_url: str = "http://172.20.70.2:5000/predict"
+    asl_rec_timeout_seconds: float = 10.0
     api_prefix: str = "/api/v1"
 
     @property
