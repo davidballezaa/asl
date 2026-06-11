@@ -64,22 +64,24 @@ This project uses visual assets from external sources for educational and protot
 - Link: <a href="https://www.flaticon.com/free-icons/accont" title="accont icons">Accont icons created by heisenberg_jr - Flaticon</a>
 
 ## Challenges:
-- Source:
-- Creator:
+- Source: Flaticon
+- Creator: Smashicons
 - Link: <a href="https://www.flaticon.com/free-icons/book" title="book icons">Book icons created by Smashicons - Flaticon</a>
 
-- Source:
-- Creator:
+- Source: Flaticon
+- Creator: Bahu Icons
 - Link: <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Bahu Icons - Flaticon</a>
 
--Source: 
-- Creator: 
+- Source: Flaticon 
+- Creator: Freepik
 - Link:  <a href="https://www.flaticon.com/free-icons/camera" title="camera icons">Camera icons created by Freepik - Flaticon</a>
-
-- Source:
-- Creator:
 - Link: <a href="https://www.flaticon.com/free-icons/alphabet" title="alphabet icons">Alphabet icons created by Freepik - Flaticon</a>
-
-- Source:
-- Creator:
 - Link: <a href="https://www.flaticon.com/free-icons/trophy" title="trophy icons">Trophy icons created by Freepik - Flaticon</a>
+
+## Path
+- Estrella: https://fsymbols.com/es/signos/estrellas/
+- Candado
+- Link: https://iconos8.es/icon/0R7F3PxtxHVm/lock
+
+## Dito Image
+- https://www.pngaaa.com/detail/3630788
