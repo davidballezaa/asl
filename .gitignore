@@ -38,9 +38,5 @@ yarn-error.log*
 # Testing
 coverage/
 
-<<<<<<< Updated upstream
 # Local presentation and architecture artifacts
 /temp/
-=======
-temp/
->>>>>>> Stashed changes
