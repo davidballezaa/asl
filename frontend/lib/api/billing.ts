@@ -1,14 +1,7 @@
 import { apiRequest } from '@/lib/api/client';
 
-// TODO(stripe): These endpoints are wired to the backend's DEMO billing flow.
-// `startCheckout` currently activates Pro immediately server-side. When real
-// Stripe is added, this should instead receive a Checkout Session URL, open it,
-// and let the Stripe webhook flip the subscription to `pro`. The response shape
-// and `useSubscription` callers should not need to change.
-
 export type CheckoutResponse = {
-  plan: 'free' | 'pro';
-  status: string;
+  url: string;
 };
 
 export type CancelResponse = {
@@ -28,7 +21,7 @@ export async function fetchPlans(): Promise<BillingPlan[]> {
   return data.plans;
 }
 
-export async function startCheckout(): Promise<CheckoutResponse> {
+export async function startBillingCheckout(): Promise<CheckoutResponse> {
   return apiRequest<CheckoutResponse>('/billing/checkout', {
     method: 'POST',
     body: {},

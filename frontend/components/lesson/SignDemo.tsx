@@ -1,7 +1,16 @@
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
+import { ProUpgradeModal } from '@/components/ProUpgradeModal';
 import { SignIllustration } from '@/components/SignIllustration';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
@@ -44,68 +53,80 @@ function YoutubeEmbed({ videoId }: { videoId: string }) {
 
 export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
   const { i18n } = useLang();
-  const { isPro, upgrade } = useSubscription();
+  const { isPro } = useSubscription();
+  const [upgradeVisible, setUpgradeVisible] = useState(false);
 
   const displayLetter =
     exercise.contentType === 'letter'
       ? exercise.signWord
       : exercise.signWord.charAt(0).toUpperCase();
 
-  const handleUpgrade = () => {
-    void upgrade();
-  };
-
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.stepHeader}>
-        <View style={styles.stepBadge}>
-          <Text style={styles.stepBadgeText}>1</Text>
-        </View>
-        <Text style={styles.stepTitle}>{i18n.lesson.watchAndLearn}</Text>
-      </View>
-
-      <NBCard style={styles.lessonCard}>
-        <View style={styles.illustrationHero}>
-          <SignIllustration
-            word={exercise.signWord}
-            size="lg"
-            variant={exercise.contentType ?? 'letter'}
-            imageUrl={exercise.imageUrl}
-          />
+    <>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.stepHeader}>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepBadgeText}>1</Text>
+          </View>
+          <Text style={styles.stepTitle}>{i18n.lesson.watchAndLearn}</Text>
         </View>
 
-        <View style={styles.letterRow}>
-          <Text style={styles.letter}>{displayLetter}</Text>
-          <Text style={styles.description}>{exercise.signDescription}</Text>
-        </View>
-      </NBCard>
+        <NBCard style={styles.lessonCard}>
+          <View style={styles.illustrationHero}>
+            <SignIllustration
+              word={exercise.signWord}
+              size="lg"
+              variant={exercise.contentType ?? 'letter'}
+              imageUrl={exercise.imageUrl}
+            />
+          </View>
 
-      {isPro && youtubeId && (
-        <View style={styles.videoSection}>
-          <YoutubeEmbed videoId={youtubeId} />
-        </View>
-      )}
+          <View style={styles.letterRow}>
+            <Text style={styles.letter}>{displayLetter}</Text>
+            <Text style={styles.description}>{exercise.signDescription}</Text>
+          </View>
+        </NBCard>
 
-      {!isPro && (
-        <Pressable onPress={handleUpgrade} style={styles.videoHint}>
-          <Text style={styles.videoHintText}>
-            {i18n.subscription.wantVideo}{' '}
-            <Text style={styles.videoHintLink}>{i18n.subscription.upgradeLink}</Text>
-          </Text>
-        </Pressable>
-      )}
+        {isPro && youtubeId && (
+          <View style={styles.videoSection}>
+            <YoutubeEmbed videoId={youtubeId} />
+          </View>
+        )}
 
-      <NBButton
-        title={i18n.lesson.gotIt}
-        variant="primary"
-        onPress={onContinue}
-        style={styles.button}
+        {!isPro && youtubeId && (
+          <Pressable
+            onPress={() => setUpgradeVisible(true)}
+            style={styles.videoHint}
+          >
+            <Text style={styles.videoHintText}>
+              {i18n.subscription.wantVideo}{' '}
+              <Text style={styles.videoHintLink}>
+                {i18n.subscription.upgradeLink}
+              </Text>
+            </Text>
+          </Pressable>
+        )}
+
+        <NBButton
+          title={i18n.lesson.gotIt}
+          variant="primary"
+          onPress={onContinue}
+          style={styles.button}
+        />
+      </ScrollView>
+
+      <ProUpgradeModal
+        visible={upgradeVisible}
+        onClose={() => setUpgradeVisible(false)}
+        onUpgraded={() => {
+          setUpgradeVisible(false);
+        }}
       />
-    </ScrollView>
+    </>
   );
 }
 

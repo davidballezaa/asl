@@ -113,7 +113,7 @@ const translations = {
       upgradeTitle: 'Desbloquea videos de señas',
       upgradeDesc:
         'Los videos paso a paso muestran cómo hacer cada seña. Actualiza a Pro para verlos.',
-      upgradeCta: 'Actualizar a Pro →',
+      upgradeCta: 'Actualizar a Pro ',
       proActive: '¡Eres Pro!',
       proActiveDesc: 'Tienes acceso a todos los videos de señas.',
       wantVideo: '¿Quieres ver el video?',
@@ -261,7 +261,7 @@ const translations = {
       upgradeTitle: 'Unlock sign videos',
       upgradeDesc:
         'Step-by-step videos show how to make each sign. Upgrade to Pro to watch them.',
-      upgradeCta: 'Upgrade to Pro →',
+      upgradeCta: 'Upgrade to Pro ',
       proActive: "You're Pro!",
       proActiveDesc: 'You have access to all sign videos.',
       wantVideo: 'Want to see the video?',
