@@ -8,13 +8,16 @@ This project uses visual assets from external sources for educational and protot
 - License: Canva Free
 - Usage: Landing page Illustration
 
-📁 assets
- ├── 📂 icons
- │    ├── 📄 academyboy.png
- |    ├── 📄 kid.png
- |    ├── 📄 man.png
- |    ├── 📄 woman1.png
- │    └── 📄 woman2.pn 
+## Index logos
+- Source Flaticon
+- Creator: vectorsmarket15
+- Link: <a href="https://www.flaticon.com/free-icons/laptop" title="laptop icons">Laptop icons created by vectorsmarket15 - Flaticon</a>
+
+- Creator: Prosymbols Premium
+- Link: <a href="https://www.flaticon.com/free-icons/trophy" title="trophy icons">Trophy icons created by Prosymbols Premium - Flaticon</a>
+
+- Creator: photo3idea_studio
+- Link: <a href="https://www.flaticon.com/free-icons/i-love-you" title="i love you icons">I love you icons created by photo3idea_studio - Flaticon</a>
 
 ## Furret logo
 - Source: Vexels
@@ -25,10 +28,6 @@ This project uses visual assets from external sources for educational and protot
 - License note: Used under Vexels license terms for prototype / educational project.
 - Accessed on: 2026-06-09
 
-📁 assets
- ├── 📂 icons
- │    └── 📄 hurron.pn 
-
 ## ASL alphabet images
 - Source: Pntree
 - Creator: SAM Attack
@@ -36,12 +35,11 @@ This project uses visual assets from external sources for educational and protot
 - Licence: Commercial license
 - Usage: Prototype
 
-📁 assets
- ├── 📂 alfabeto_manos
 
  ## Iconos para el learning path pague and  rewards
 
  - Source: Flaticon
+ - Creator:  Freepik
  - Links: 
     - <a href="https://www.flaticon.com/free-icons/startup" title="startup icons">Startup icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/target" title="target icons">Target icons created by Freepik - Flaticon</a>
@@ -59,3 +57,8 @@ This project uses visual assets from external sources for educational and protot
     - <a href="https://www.flaticon.com/free-icons/achievement" title="achievement icons">Achievement icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/trophy" title="trophy icons">Trophy icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/insignia" title="insignia icons">Insignia icons created by Freepik - Flaticon</a>
+
+## Avatar
+- Source: Flaticon
+- Creator: heisenberg_gr
+- Link: <a href="https://www.flaticon.com/free-icons/accont" title="accont icons">Accont icons created by heisenberg_jr - Flaticon</a>
