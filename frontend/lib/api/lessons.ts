@@ -15,6 +15,16 @@ export async function attemptExercise(
   );
 }
 
+export async function skipCameraExercise(
+  lessonId: string,
+  exerciseId: string,
+): Promise<{ skipped: boolean }> {
+  return apiRequest<{ skipped: boolean }>(
+    `/lessons/${lessonId}/exercises/${exerciseId}/skip`,
+    { method: 'POST', body: {} },
+  );
+}
+
 export async function completeLesson(
   lessonId: string,
 ): Promise<CompleteLessonResponse> {

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 
 from app.domain.challenges import CHALLENGES, ChallengeDef
 from app.domain.entities.user import UserProgress
@@ -8,7 +8,6 @@ from app.domain.level_tiers import LEVEL_TIERS, LevelTier
 
 XP_PER_EXERCISE = 10
 XP_LESSON_BONUS = 20
-DEFAULT_HEARTS = 5
 
 
 def to_date_key(d: date) -> str:
@@ -18,19 +17,13 @@ def to_date_key(d: date) -> str:
 def get_current_streak(practice_days: list[str]) -> int:
     if not practice_days:
         return 0
-    sorted_days = sorted(practice_days, reverse=True)
-    today = date.today()
+    practice_day_keys = set(practice_days)
+    today = datetime.now(timezone.utc).date()
+    check = today if to_date_key(today) in practice_day_keys else today - timedelta(days=1)
     streak = 0
-    check = today
-    for i in range(365):
-        key = to_date_key(check)
-        if key in sorted_days:
-            streak += 1
-            check = date.fromordinal(check.toordinal() - 1)
-        elif i == 0:
-            check = date.fromordinal(check.toordinal() - 1)
-        else:
-            break
+    while to_date_key(check) in practice_day_keys:
+        streak += 1
+        check -= timedelta(days=1)
     return streak
 
 
@@ -65,10 +58,6 @@ def _tier_dict(tier: LevelTier) -> dict:
         "medal": tier.medal,
         "medalLabel": tier.medal_label,
     }
-
-
-def get_claimed_challenge_xp(claimed_ids: list[str]) -> int:
-    return sum(c.xp_reward for c in CHALLENGES if c.id in claimed_ids)
 
 
 def get_challenge_progress_value(challenge: ChallengeDef, progress: UserProgress) -> int:
@@ -120,28 +109,15 @@ def is_lesson_locked(lesson_id: str, completed: list[str], all_ids: list[str]) -
     return all_ids[idx - 1] not in completed
 
 
-def reset_daily_counter_if_needed(progress: UserProgress) -> None:
-    today = date.today()
-    if progress.lessons_today_date != today:
-        progress.lessons_completed_today = 0
-        progress.lessons_today_date = today
-
-
-def record_practice_day(progress: UserProgress) -> None:
-    key = to_date_key(date.today())
-    if key not in progress.practice_days:
-        progress.practice_days.append(key)
-
-
-def build_gamification_state(progress: UserProgress, total_lessons: int, all_ids: list[str]) -> dict:
-    challenge_xp = get_claimed_challenge_xp(progress.claimed_challenge_ids)
-    total_xp = progress.lesson_xp + challenge_xp
+def build_gamification_state(
+    progress: UserProgress, total_lessons: int, all_ids: list[str]
+) -> dict:
+    total_xp = progress.lesson_xp + progress.challenge_xp
     return {
         "totalXp": total_xp,
         "level": get_level_progress(total_xp),
         "challenges": build_challenge_progress_list(progress),
         "activeLessonId": get_active_lesson_id(progress.completed_lesson_ids, all_ids),
-        "hearts": progress.hearts,
         "streak": get_current_streak(progress.practice_days),
         "completedLessons": len(progress.completed_lesson_ids),
         "totalLessons": total_lessons,

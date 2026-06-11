@@ -17,6 +17,8 @@ def _exercise_to_dict(e: Exercise) -> dict:
         d["options"] = e.options
     if e.correct_answer:
         d["correctAnswer"] = e.correct_answer
+    if e.image_url:
+        d["imageUrl"] = e.image_url
     return d
 
 

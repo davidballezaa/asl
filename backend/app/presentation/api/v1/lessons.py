@@ -51,6 +51,20 @@ async def attempt_exercise(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found")
 
 
+@router.post("/{lesson_id}/exercises/{exercise_id}/skip")
+async def skip_camera_exercise(
+    lesson_id: str,
+    exercise_id: str,
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    uow: Annotated[UnitOfWork, Depends(get_uow)],
+):
+    service = LessonService(uow)
+    try:
+        return await service.skip_camera_exercise(user_id, lesson_id, exercise_id)
+    except ExerciseNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found")
+
+
 @router.post("/{lesson_id}/complete")
 async def complete_lesson(
     lesson_id: str,

@@ -198,6 +198,7 @@ export function MultipleChoiceQuiz({
         word={exercise.signWord}
         size="md"
         variant={exercise.contentType ?? 'letter'}
+        imageUrl={exercise.imageUrl}
       />
 
       <View style={styles.options}>

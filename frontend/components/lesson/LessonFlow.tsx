@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -13,62 +14,14 @@ import { SignDemo } from '@/components/lesson/SignDemo';
 import { colors } from '@/constants/colors';
 import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
-import { completeLesson } from '@/lib/api/lessons';
+import { completeLesson, skipCameraExercise } from '@/lib/api/lessons';
 import { t } from '@/lib/i18n';
-import type { Exercise, Lesson } from '@/lib/mock-data';
+import type { Lesson } from '@/lib/mock-data';
 
 type LessonFlowProps = {
   lesson: Lesson;
   lessonId: string;
 };
-
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-function shuffle<T>(items: T[]) {
-  const copy = [...items];
-
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
-  }
-
-  return copy;
-}
-
-function normalizeLetterAnswer(value: string) {
-  return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
-}
-
-function createLetterOptions(correctAnswer: string) {
-  const correct = normalizeLetterAnswer(correctAnswer);
-  const wrongOptions = shuffle(ALPHABET.filter((letter) => letter !== correct));
-
-  return shuffle([correct, ...wrongOptions.slice(0, 3)]);
-}
-
-function createFallbackQuiz(exercise: Exercise, index: number): Exercise {
-  const rawAnswer = String(exercise.correctAnswer ?? exercise.signWord);
-  const isLetter = (exercise.contentType ?? 'letter') === 'letter';
-
-  const correctAnswer = isLetter
-    ? normalizeLetterAnswer(rawAnswer)
-    : rawAnswer.toUpperCase();
-
-  return {
-    ...exercise,
-    id: `${exercise.id}-fallback-quiz-${index}`,
-    type: 'quiz',
-    correctAnswer,
-    options: exercise.options?.length
-      ? exercise.options
-      : createLetterOptions(correctAnswer),
-    contentType: exercise.contentType ?? 'letter',
-  } as Exercise;
-}
-
-function buildRandomLessonRun(exercises: Exercise[]) {
-  return shuffle(exercises);
-}
 
 export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
   const router = useRouter();
@@ -79,12 +32,11 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     return lesson.exercises.map((exercise) => exercise.id).join('|');
   }, [lesson.exercises]);
 
-  const [runExercises, setRunExercises] = useState<Exercise[]>(() =>
-    buildRandomLessonRun(lesson.exercises),
-  );
+  const exercises = lesson.exercises;
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const [xpEarned, setXpEarned] = useState(lesson.xpReward);
+  const [exitDialogVisible, setExitDialogVisible] = useState(false);
 
   const trophyScale = useRef(new Animated.Value(0.5)).current;
   const finishingRef = useRef(false);
@@ -93,14 +45,13 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     finishingRef.current = false;
     trophyScale.setValue(0.5);
 
-    setRunExercises(buildRandomLessonRun(lesson.exercises));
     setStep(0);
     setFinished(false);
     setXpEarned(lesson.xpReward);
   }, [lessonId, exerciseSignature, lesson.exercises, lesson.xpReward, trophyScale]);
 
-  const exercise = runExercises[step];
-  const total = runExercises.length;
+  const exercise = exercises[step];
+  const total = exercises.length;
 
   const finishLesson = useCallback(() => {
     if (finishingRef.current) return;
@@ -126,33 +77,44 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
 
   const goNext = useCallback(() => {
     setStep((currentStep) => {
-      if (currentStep + 1 >= runExercises.length) {
+      if (currentStep + 1 >= exercises.length) {
         finishLesson();
         return currentStep;
       }
 
       return currentStep + 1;
     });
-  }, [finishLesson, runExercises.length]);
+  }, [exercises.length, finishLesson]);
+
+  const leaveLesson = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleClose = useCallback(() => {
+    setExitDialogVisible(true);
+  }, []);
+
+  const handleStay = useCallback(() => {
+    setExitDialogVisible(false);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    setExitDialogVisible(false);
+    leaveLesson();
+  }, [leaveLesson]);
 
   const skipCameraPractice = useCallback(() => {
-    const currentExercise = runExercises[step];
+    const currentExercise = exercises[step];
 
     if (!currentExercise || currentExercise.type !== 'camera') {
       goNext();
       return;
     }
 
-    const fallbackQuiz = createFallbackQuiz(currentExercise, step);
-
-    setRunExercises((currentRun) => [
-      ...currentRun.slice(0, step + 1),
-      fallbackQuiz,
-      ...currentRun.slice(step + 1),
-    ]);
-
-    setStep((currentStep) => currentStep + 1);
-  }, [goNext, runExercises, step]);
+    void skipCameraExercise(lessonId, currentExercise.id)
+      .then(() => refreshMe())
+      .finally(goNext);
+  }, [exercises, goNext, lessonId, refreshMe, step]);
 
   if (finished) {
     return (
@@ -188,10 +150,20 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ConfirmDialog
+        visible={exitDialogVisible}
+        title={i18n.lesson.exitTitle}
+        message={i18n.lesson.exitMessage}
+        cancelLabel={i18n.lesson.exitStay}
+        confirmLabel={i18n.lesson.exitLeave}
+        onCancel={handleStay}
+        onConfirm={handleLeave}
+      />
+
       <LessonHeader
         progress={step}
         total={total}
-        onClose={() => router.back()}
+        onClose={handleClose}
       />
 
       <ScreenContainer size="wide" style={[styles.body, { flex: 1 }]}>

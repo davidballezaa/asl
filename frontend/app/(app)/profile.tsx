@@ -13,7 +13,7 @@ import { colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
 import { useLang } from '@/context/LangContext';
 import { useAppData, useGamification } from '@/context/AppDataContext';
-import { isProUser } from '@/lib/subscription';
+import { useSubscription } from '@/lib/subscription';
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
@@ -21,7 +21,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { me } = useAppData();
   const state = useGamification();
-  const [isPro, setIsPro] = useState(isProUser());
+  const { isPro } = useSubscription();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -46,6 +46,14 @@ export default function ProfileScreen() {
 
           <PracticeHeatmap practiceDays={me?.profile.practiceDays ?? []} />
 
+          {me?.user.role === 'admin' && (
+            <NBButton
+              title="Admin panel"
+              variant="secondary"
+              onPress={() => router.push('/admin')}
+            />
+          )}
+
           <NBButton
             title={i18n.profile.signOut}
             variant="ghost"
@@ -58,7 +66,7 @@ export default function ProfileScreen() {
       <ProUpgradeModal
         visible={upgradeOpen && !isPro}
         onClose={() => setUpgradeOpen(false)}
-        onUpgraded={() => setIsPro(true)}
+        onUpgraded={() => setUpgradeOpen(false)}
       />
     </SafeAreaView>
   );

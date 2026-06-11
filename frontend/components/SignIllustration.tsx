@@ -8,6 +8,9 @@ type SignIllustrationProps = {
   word: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: ContentType;
+  // Optional admin-set image. When present it replaces the letter composition;
+  // when absent we fall back to the bundled fingerspelling illustration.
+  imageUrl?: string;
 };
 
 const sizeMap = {
@@ -20,6 +23,7 @@ export function SignIllustration({
   word,
   size = 'md',
   variant = 'letter',
+  imageUrl,
 }: SignIllustrationProps) {
   const dims = sizeMap[size];
   const letters = variant === 'letter' ? getSignLetters(word,1) : getSignLetters(word, size=== 'lg'? 6 : 4);
@@ -36,6 +40,13 @@ export function SignIllustration({
           },
         ]}
       >
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            resizeMode="contain"
+            style={{ width: dims.box - 24, height: dims.box - 24 }}
+          />
+        ) : (
         <View style={styles.signRow}>
           {letters.map((letter, index) => {
             const source = ASL_LETTER_IMAGES[letter];
@@ -76,6 +87,7 @@ export function SignIllustration({
             );
           })}
         </View>
+        )}
 
         <Text
           style={[

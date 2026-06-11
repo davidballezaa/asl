@@ -37,3 +37,6 @@ yarn-error.log*
 
 # Testing
 coverage/
+
+# Local presentation and architecture artifacts
+/temp/

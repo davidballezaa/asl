@@ -38,5 +38,18 @@ async def get_current_user_id(
     return user_id
 
 
+async def require_admin(
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    uow: Annotated[UnitOfWork, Depends(get_uow)],
+) -> UUID:
+    user = await uow.users.get_by_id(user_id)
+    if not user or not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return user_id
+
+
 def get_recognizer() -> SignRecognizer:
     return get_sign_recognizer()

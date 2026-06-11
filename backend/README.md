@@ -7,18 +7,16 @@ FastAPI backend for the ASL Quest mobile app.
 ```bash
 cp .env.example .env
 
-# Start Postgres
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d postgres
-
-# Run API
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
+alembic upgrade head
+python -m scripts.seed_curriculum
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Docs: http://localhost:8000/docs
 
-SQLite-only (no Docker): omit `.env` or set `DATABASE_URL=sqlite+aiosqlite:///./asl.db`.
+SQLite (no Postgres needed): omit `.env` or set `DATABASE_URL=sqlite+aiosqlite:///./asl.db`.
 
 ### Connect the Expo app
 
@@ -35,24 +33,27 @@ Use your LAN IP instead of `localhost` on a physical device.
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | SQLAlchemy URL (Postgres or SQLite) |
-| `POSTGRES_*` | Used by `docker compose` |
 | `JWT_SECRET` | Auth token signing key |
-| `CORS_ORIGINS` | Comma-separated browser origins |
-| `API_DOMAIN` | Hostname for Caddy TLS (production) |
+| `CORS_ORIGINS` | Comma-separated allowed origins |
 | `RECOGNIZER_IMPL` | `stub` or `asl_rec` |
 
 ## Production
 
-On a VPS with Docker, ports 80/443 open, and DNS pointing to the server:
+The backend runs as a systemd service (`asl-backend.service`) on the `salva-backend` instance, serving uvicorn directly on port `8000`. NGINX on `salva-lb` handles TLS termination and proxying.
+
+To deploy an update:
 
 ```bash
-cp .env.example .env   # set POSTGRES_PASSWORD, JWT_SECRET, API_DOMAIN
-docker compose up -d --build
+# On salva-backend
+cd /opt/asl/backend
+git pull
+.venv-prod/bin/pip install .
+.venv-prod/bin/alembic upgrade head
+python -m scripts.seed_curriculum
+sudo systemctl restart asl-backend
 ```
 
-Local full stack (no TLS): `docker compose -f docker-compose.yml -f docker-compose.local.yml up --build`
-
-Backup: `docker compose exec postgres pg_dump -U asl asl > backup.sql`
+Environment is loaded from `/etc/asl-backend.env`.
 
 ## Tests
 
