@@ -75,22 +75,22 @@ export default function LandingScreen() {
 
   const features = [
     {
-      icon: '🤟',
+      image: require('../../frontend/assets/icons/sign.png'),
       title: i18n.landing.features.f1Title,
       desc: i18n.landing.features.f1Desc,
-      color: colors.primary,
+      color: colors.orange,
     },
     {
-      icon: '📷',
+      image: require('../../frontend/assets/icons/online.png'),
       title: i18n.landing.features.f2Title,
       desc: i18n.landing.features.f2Desc,
-      color: colors.success,
+      color: colors.peach,
     },
     {
-      icon: '🏆',
+      image: require('../../frontend/assets/icons/trophy_index.png'),
       title: i18n.landing.features.f3Title,
       desc: i18n.landing.features.f3Desc,
-      color: colors.secondary,
+      color: colors.blue_light,
     },
   ];
 
@@ -197,7 +197,11 @@ export default function LandingScreen() {
             {features.map((f) => (
               <NBCard key={f.title} style={styles.featureCard}>
                 <View style={[styles.featureIcon, { backgroundColor: f.color }]}>
-                  <Text style={styles.featureEmoji}>{f.icon}</Text>
+                  <Image
+                    source={f.image}
+                    resizeMode='contain'
+                    style={styles.featureImage}
+                  /> 
                 </View>
                 <Text style={styles.featureTitle}>{f.title}</Text>
                 <Text style={styles.featureDesc}>{f.desc}</Text>
@@ -348,9 +352,10 @@ const styles = StyleSheet.create({
     elevation: 4,
     width: 56,
   },
-  featureEmoji: {
-    fontSize: 26,
-  },
+  featureImage: {
+    height: 38,
+    width:38,
+    },
   featureTitle: {
     color: colors.text,
     fontFamily: 'Fredoka_700Bold',

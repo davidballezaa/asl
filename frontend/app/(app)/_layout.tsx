@@ -1,5 +1,12 @@
 import { Redirect, Tabs } from 'expo-router';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
@@ -32,21 +39,29 @@ export default function AppLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: 'Curse',
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📚" focused={focused} />
+            <ImageTabIcon
+              source={require('../../assets/icons/Curses.png')}
+              focused={focused}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="👤" focused={focused} />
+            <ImageTabIcon
+              source={require('../../assets/icons/profile.png')}
+              focused={focused}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="learn"
         options={{
@@ -54,6 +69,30 @@ export default function AppLayout() {
         }}
       />
     </Tabs>
+  );
+}
+
+function ImageTabIcon({
+  source,
+  focused,
+}: {
+  source: ImageSourcePropType;
+  focused: boolean;
+}) {
+  return (
+    <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
+      <Image
+        source={source}
+        resizeMode="contain"
+        style={[
+          styles.tabIconImage,
+          {
+            opacity: focused ? 1 : 0.55,
+            transform: [{ scale: focused ? 1.08 : 1 }],
+          },
+        ]}
+      />
+    </View>
   );
 }
 
@@ -96,6 +135,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
+  },
+  tabIconImage: {
+    height: 28,
+    width: 28,
   },
   tabEmoji: {
     fontSize: 24,
