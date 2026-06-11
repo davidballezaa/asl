@@ -42,7 +42,6 @@ This project uses visual assets from external sources for educational and protot
  ## Iconos para el learning path pague and  rewards
 
  - Source: Flaticon
- - Creator: 
  - Links: 
     - <a href="https://www.flaticon.com/free-icons/startup" title="startup icons">Startup icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/target" title="target icons">Target icons created by Freepik - Flaticon</a>
@@ -59,4 +58,4 @@ This project uses visual assets from external sources for educational and protot
     -<a href="https://www.flaticon.com/free-icons/sheriff" title="sheriff icons">Sheriff icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/achievement" title="achievement icons">Achievement icons created by Freepik - Flaticon</a>
     - <a href="https://www.flaticon.com/free-icons/trophy" title="trophy icons">Trophy icons created by Freepik - Flaticon</a>
-    - 
+    - <a href="https://www.flaticon.com/free-icons/insignia" title="insignia icons">Insignia icons created by Freepik - Flaticon</a>
