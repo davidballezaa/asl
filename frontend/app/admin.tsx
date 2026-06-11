@@ -8,11 +8,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CurriculumBrowser } from '@/components/admin/CurriculumBrowser';
+import { UserGrowthChart } from '@/components/admin/UserGrowthChart';
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { colors } from '@/constants/colors';
@@ -330,6 +332,9 @@ export default function AdminScreen() {
 }
 
 function Metrics({ metrics }: { metrics: AdminMetrics }) {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+
   const cards: { label: string; value: string }[] = [
     { label: 'Total users', value: String(metrics.totalUsers) },
     { label: 'Active (7d)', value: String(metrics.activeUsers7d) },
@@ -344,12 +349,20 @@ function Metrics({ metrics }: { metrics: AdminMetrics }) {
     <View style={{ gap: 16 }}>
       <View style={styles.metricGrid}>
         {cards.map((c) => (
-          <NBCard key={c.label} style={styles.metricCard}>
+          <NBCard
+            key={c.label}
+            style={[styles.metricCard, isDesktop && styles.metricCardDesktop]}
+          >
             <Text style={styles.metricValue}>{c.value}</Text>
             <Text style={styles.metricLabel}>{c.label}</Text>
           </NBCard>
         ))}
       </View>
+
+      <NBCard style={{ gap: 12 }}>
+        <Text style={styles.sectionTitle}>User growth (90 days)</Text>
+        <UserGrowthChart data={metrics.userGrowth} />
+      </NBCard>
 
       <NBCard style={{ gap: 8 }}>
         <Text style={styles.sectionTitle}>Lesson completions</Text>
@@ -522,7 +535,8 @@ const styles = StyleSheet.create({
   loading: { alignItems: 'center', flex: 1, justifyContent: 'center' },
   scroll: { padding: 16, paddingBottom: 48 },
   metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  metricCard: { alignItems: 'center', flexBasis: '47%', flexGrow: 1, gap: 2 },
+  metricCard: { alignItems: 'center', flexBasis: '47%', flexGrow: 1, gap: 2, minWidth: '46%' },
+  metricCardDesktop: { flexBasis: '23%', maxWidth: '24%', minWidth: '22%' },
   metricValue: { color: colors.text, fontFamily: 'Fredoka_700Bold', fontSize: 26 },
   metricLabel: { color: colors.muted, fontFamily: 'Nunito_600SemiBold', fontSize: 12 },
   sectionTitle: { color: colors.text, fontFamily: 'Fredoka_700Bold', fontSize: 16 },

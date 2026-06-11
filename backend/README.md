@@ -11,6 +11,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 alembic upgrade head
 python -m scripts.seed_curriculum
+python -m scripts.seed_demo_users   # optional: demo users for admin metrics
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 

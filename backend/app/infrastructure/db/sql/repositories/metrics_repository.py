@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import case, func, select
@@ -16,6 +17,7 @@ from app.infrastructure.db.sql.models import (
 )
 
 _ACTIVE_SUBSCRIPTION_STATUSES = ("active", "trialing")
+_USER_GROWTH_DAYS = 90
 
 
 class SQLMetricsRepository:
@@ -56,6 +58,7 @@ class SQLMetricsRepository:
             "proConversionRate": conversion,
             "lessonCompletions": await self._lesson_completions(),
             "hardestQuizzes": await self._hardest_quizzes(),
+            "userGrowth": await self._user_growth(),
         }
 
     async def _count(self, model, *where) -> int:
@@ -82,6 +85,44 @@ class SQLMetricsRepository:
             user_ids.update(row[0] for row in result.all())
         return len(user_ids)
 
+    async def _user_growth(self) -> list[dict]:
+        today = datetime.now(timezone.utc).date()
+        start = today - timedelta(days=_USER_GROWTH_DAYS - 1)
+
+        signup_rows = await self._session.execute(select(UserModel.created_at))
+        signups_by_day: dict = defaultdict(int)
+        for (created_at,) in signup_rows.all():
+            signups_by_day[created_at.date()] += 1
+
+        pro_rows = await self._session.execute(
+            select(SubscriptionModel.created_at).where(
+                SubscriptionModel.status.in_(_ACTIVE_SUBSCRIPTION_STATUSES)
+            )
+        )
+        pro_by_day: dict = defaultdict(int)
+        for (created_at,) in pro_rows.all():
+            pro_by_day[created_at.date()] += 1
+
+        cumulative_users = sum(
+            count for day, count in signups_by_day.items() if day < start
+        )
+        cumulative_pro = sum(
+            count for day, count in pro_by_day.items() if day < start
+        )
+        series: list[dict] = []
+        for offset in range(_USER_GROWTH_DAYS):
+            day = start + timedelta(days=offset)
+            cumulative_users += signups_by_day.get(day, 0)
+            cumulative_pro += pro_by_day.get(day, 0)
+            series.append(
+                {
+                    "date": day.isoformat(),
+                    "totalUsers": cumulative_users,
+                    "proUsers": cumulative_pro,
+                }
+            )
+        return series
+
     async def _lesson_completions(self) -> list[dict]:
         result = await self._session.execute(
             select(
@@ -94,7 +135,7 @@ class SQLMetricsRepository:
                 UserLessonCompletionModel.lesson_id == LessonModel.id,
             )
             .group_by(LessonModel.id, LessonModel.title)
-            .order_by(func.count(UserLessonCompletionModel.user_id).desc())
+            .order_by(LessonModel.title)
         )
         return [
             {"lessonId": lesson_id, "title": title, "completions": completions}
