@@ -1,5 +1,11 @@
 import { apiRequest } from '@/lib/api/client';
 
+export type UserGrowthPoint = {
+  date: string;
+  totalUsers: number;
+  proUsers: number;
+};
+
 export type AdminMetrics = {
   totalUsers: number;
   newSignups7d: number;
@@ -9,6 +15,7 @@ export type AdminMetrics = {
   proSubscribers: number;
   freeUsers: number;
   proConversionRate: number;
+  userGrowth: UserGrowthPoint[];
   lessonCompletions: { lessonId: string; title: string; completions: number }[];
   hardestQuizzes: {
     exerciseId: string;

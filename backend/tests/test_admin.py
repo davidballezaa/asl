@@ -218,12 +218,18 @@ async def test_metrics_overview_shape_has_no_pii(
         "proSubscribers",
         "freeUsers",
         "proConversionRate",
+        "userGrowth",
         "lessonCompletions",
         "hardestQuizzes",
     ):
         assert key in data
     assert data["totalUsers"] >= 1
     assert data["totalLessonsCompleted"] >= 1
+    assert len(data["userGrowth"]) == 90
+    assert "date" in data["userGrowth"][0]
+    assert "totalUsers" in data["userGrowth"][0]
+    assert "proUsers" in data["userGrowth"][0]
+    assert data["userGrowth"][-1]["totalUsers"] == data["totalUsers"]
 
     # No personally identifiable information anywhere in the payload.
     body = response.text
