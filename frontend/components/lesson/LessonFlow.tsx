@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -52,6 +53,7 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const [xpEarned, setXpEarned] = useState(lesson.xpReward);
+  const [exitDialogVisible, setExitDialogVisible] = useState(false);
 
   const trophyScale = useRef(new Animated.Value(0.5)).current;
   const finishingRef = useRef(false);
@@ -102,6 +104,23 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
     });
   }, [finishLesson, runExercises.length]);
 
+  const leaveLesson = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleClose = useCallback(() => {
+    setExitDialogVisible(true);
+  }, []);
+
+  const handleStay = useCallback(() => {
+    setExitDialogVisible(false);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    setExitDialogVisible(false);
+    leaveLesson();
+  }, [leaveLesson]);
+
   const skipCameraPractice = useCallback(() => {
     const currentExercise = runExercises[step];
 
@@ -149,10 +168,20 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ConfirmDialog
+        visible={exitDialogVisible}
+        title={i18n.lesson.exitTitle}
+        message={i18n.lesson.exitMessage}
+        cancelLabel={i18n.lesson.exitStay}
+        confirmLabel={i18n.lesson.exitLeave}
+        onCancel={handleStay}
+        onConfirm={handleLeave}
+      />
+
       <LessonHeader
         progress={step}
         total={total}
-        onClose={() => router.back()}
+        onClose={handleClose}
       />
 
       <ScreenContainer size="wide" style={[styles.body, { flex: 1 }]}>

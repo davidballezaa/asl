@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,6 +17,21 @@ export default function LessonScreen() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [flowKey, setFlowKey] = useState(0);
+  const hasBlurredRef = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (hasBlurredRef.current) {
+        setFlowKey((current) => current + 1);
+        hasBlurredRef.current = false;
+      }
+
+      return () => {
+        hasBlurredRef.current = true;
+      };
+    }, []),
+  );
 
   useEffect(() => {
     if (!lessonId) return;
@@ -52,7 +67,13 @@ export default function LessonScreen() {
     );
   }
 
-  return <LessonFlow lesson={lesson} lessonId={lessonId ?? lesson.id} />;
+  return (
+    <LessonFlow
+      key={flowKey}
+      lesson={lesson}
+      lessonId={lessonId ?? lesson.id}
+    />
+  );
 }
 
 const styles = StyleSheet.create({

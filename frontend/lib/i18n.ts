@@ -101,6 +101,10 @@ const translations = {
       backToPath: 'Volver al camino',
       notFound: 'Lección no encontrada',
       goBack: 'Regresar',
+      exitTitle: '¿Salir de la lección?',
+      exitMessage: 'Perderás tu progreso en esta lección.',
+      exitStay: 'Seguir',
+      exitLeave: 'Salir',
     },
     subscription: {
       freeBadge: 'Plan Gratis',
@@ -244,6 +248,10 @@ const translations = {
       backToPath: 'Back to path',
       notFound: 'Lesson not found',
       goBack: 'Go back',
+      exitTitle: 'Leave lesson?',
+      exitMessage: "You'll lose your progress in this lesson.",
+      exitStay: 'Stay',
+      exitLeave: 'Leave',
     },
     subscription: {
       freeBadge: 'Free Plan',
