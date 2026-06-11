@@ -16,9 +16,9 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { colors } from '@/constants/colors';
 import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
+import { getSignImageSource } from '@/lib/alphabet';
 import { getAllLessonIdsInOrder, getAllLessons } from '@/lib/mock-data';
 import { isLessonCompleted, isLessonLocked } from '@/lib/user-progress';
-import { getSignImageSource } from '@/lib/alphabet';
 
 // Fractions along the full track: left edge, center, right edge, center
 const ZIGZAG = [0, 0.5, 1, 0.5] as const;
@@ -55,9 +55,9 @@ function usePathMetrics(pathWidth: number) {
     const rowHeight = connectorTop + connectorHeight;
     const titleSize = compact ? 28 : 32;
 
-    // Inset so columns at 0% / 100% stay inside the container
     const inset = halfColumn;
     const trackWidth = pathWidth - 2 * inset;
+
     const nodeX = (index: number) =>
       inset + ZIGZAG[index % 4] * trackWidth;
 
@@ -94,13 +94,21 @@ export function LearnPath() {
   const { i18n } = useLang();
   const { width: screenWidth } = useWindowDimensions();
   const [pathWidth, setPathWidth] = useState(0);
+
   const layoutWidth = pathWidth || screenWidth - 32;
   const metrics = usePathMetrics(layoutWidth);
+
   const { me, units } = useAppData();
+
   const allLessons = useMemo(() => getAllLessons(units) ?? [], [units]);
-  const allLessonIds = useMemo(() => getAllLessonIdsInOrder(units) ?? [], [units]);
+  const allLessonIds = useMemo(
+    () => getAllLessonIdsInOrder(units) ?? [],
+    [units],
+  );
+
   const completedLessonIds = me?.progress.completedLessonIds ?? [];
   const activeLessonId = me?.gamification.activeLessonId ?? 'lesson-1';
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -140,6 +148,7 @@ export function LearnPath() {
     nodeTop,
     nodeX,
   } = metrics;
+
   const halfNode = nodeSize / 2;
 
   return (
@@ -161,33 +170,40 @@ export function LearnPath() {
         {allLessons.map((lesson, index) => {
           const completed = isLessonCompleted(lesson.id, completedLessonIds);
           const isActive = lesson.id === activeLessonId;
+
           const locked = isLessonLocked(
             lesson.id,
             completedLessonIds,
             allLessonIds,
           );
+
           const nodeState = getNodeState(completed, isActive, locked);
           const firstSignWord = getLessonPreviewSign(lesson);
           const nodeSignSource = getSignImageSource(firstSignWord);
 
+          const displayTitle =
+            lesson.title === 'Y, Z & Names' ? 'Y, Z' : lesson.title;
+
           return (
             <View key={lesson.id} style={[styles.row, { height: rowHeight }]}>
-              {index < allLessons.length - 1 && (
-                <Svg
-                  width={layoutWidth}
-                  height={connectorHeight}
-                  style={[styles.connector, { top: connectorTop }]}
-                  pointerEvents="none"
-                >
-                  <Path
-                    d={`M ${nodeX(index)} 0 Q ${(nodeX(index) + nodeX(index + 1)) / 2} ${connectorHeight / 2}, ${nodeX(index + 1)} ${connectorHeight}`}
-                    stroke={colors.border}
-                    strokeWidth={compact ? 3 : 4}
-                    strokeDasharray="8 10"
-                    fill="none"
-                  />
-                </Svg>
-              )}
+              <Svg
+                width={layoutWidth}
+                height={connectorHeight}
+                style={[styles.connector, { top: connectorTop }]}
+                pointerEvents="none"
+              >
+                <Path
+                  d={`M ${nodeX(index)} 0 Q ${
+                    (nodeX(index) + nodeX(index + 1)) / 2
+                  } ${connectorHeight / 2}, ${nodeX(index + 1)} ${
+                    connectorHeight
+                  }`}
+                  stroke={colors.border}
+                  strokeWidth={compact ? 3 : 4}
+                  strokeDasharray="8 10"
+                  fill="none"
+                />
+              </Svg>
 
               <View
                 style={[
@@ -221,43 +237,42 @@ export function LearnPath() {
                       },
                     ]}
                   >
-                  {nodeState === 'locked' ?(
-                    <Text
-                    style={[
-                      styles.nodeSignImage,
-                      compact && styles.nodeSignImageCompact,
-                      styles.nodeIconLocked,
-                    ]}
-                  >
-                    🔒
-                  </Text>
-                ): nodeSignSource? (
-                  <>
-                    <Image
-                    source={nodeSignSource}
-                    resizeMode='contain'
-                    style={[
-                      styles.nodeSignImage,
-                      compact && styles.nodeSignImage
-                    ]}
-                  />
-                    {nodeState === 'completed' && (
-                      <View style={styles.doneBadge}>
-                        <Text style={styles.doneBadgeText}>✓</Text>
-                      </View>
+                    {nodeState === 'locked' ? (
+                      <Image
+                        source={require('../assets/icons/candado.png')}
+                        resizeMode="contain"
+                        style={[
+                          styles.nodeLockImage,
+                          compact && styles.nodeLockImageCompact,
+                        ]}
+                      />
+                    ) : nodeSignSource ? (
+                      <>
+                        <Image
+                          source={nodeSignSource}
+                          resizeMode="contain"
+                          style={[
+                            styles.nodeSignImage,
+                            compact && styles.nodeSignImageCompact,
+                          ]}
+                        />
+
+                        {nodeState === 'completed' && (
+                          <View style={styles.doneBadge}>
+                            <Text style={styles.doneBadgeText}>✓</Text>
+                          </View>
+                        )}
+                      </>
+                    ) : (
+                      <Text
+                        style={[
+                          styles.nodeIcon,
+                          compact && styles.nodeIconCompact,
+                        ]}
+                      >
+                        {nodeState === 'completed' ? '★' : '▶'}
+                      </Text>
                     )}
-                  </>
-                  ) : (
-                    <Text
-                    style={[
-                      styles.nodeIcon,
-                      compact && styles.nodeIconCompact,
-                    ]}
-                  >
-                    {nodeState === 'completed'?  '✓' : '▶'}
-                </Text>
-              )}
-              
                   </Animated.View>
                 </Pressable>
 
@@ -276,8 +291,9 @@ export function LearnPath() {
                       locked && styles.labelTitleLocked,
                     ]}
                   >
-                    {lesson.title}
+                    {displayTitle}
                   </Text>
+
                   <View style={styles.xpRow}>
                     <Text style={styles.starIcon}>⭐</Text>
                     <Text style={styles.labelXp}>
@@ -289,6 +305,64 @@ export function LearnPath() {
             </View>
           );
         })}
+
+        {allLessons.length > 0 && (
+          <View style={[styles.row, { height: rowHeight }]}>
+            <View
+              style={[
+                styles.nodeColumn,
+                {
+                  left: nodeX(allLessons.length),
+                  top: nodeTop,
+                  transform: [{ translateX: -halfColumn }],
+                  width: columnWidth,
+                  gap: labelGap,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.node,
+                  styles.nodeComingSoon,
+                  {
+                    borderRadius: halfNode,
+                    height: nodeSize,
+                    width: nodeSize,
+                  },
+                ]}
+              >
+                <Image
+                  source={require('../assets/icons/ditto.png')}
+                  resizeMode="contain"
+                  style={[
+                    styles.nodeDittoImage,
+                    compact && styles.nodeDittoImageCompact,
+                  ]}
+                />
+              </View>
+
+              <View
+                style={[
+                  styles.labelCard,
+                  styles.comingSoonCard,
+                  { width: labelWidth },
+                  compact && styles.labelCardCompact,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.labelTitle,
+                    styles.comingSoonText,
+                    compact && styles.labelTitleCompact,
+                  ]}
+                >
+                  Coming soon
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         <View style={styles.pathFooter} />
       </View>
     </ScreenContainer>
@@ -337,7 +411,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 4,
     justifyContent: 'center',
-    overflow : 'visible',
+    overflow: 'visible',
   },
   nodeCurrent: {
     backgroundColor: colors.primary,
@@ -366,6 +440,15 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 3,
   },
+  nodeComingSoon: {
+    backgroundColor: '#EDE7FF',
+    borderColor: colors.border,
+    shadowColor: colors.border,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
   nodeIcon: {
     color: '#FFFFFF',
     fontFamily: 'Nunito_800ExtraBold',
@@ -374,17 +457,30 @@ const styles = StyleSheet.create({
   nodeIconCompact: {
     fontSize: 20,
   },
-  nodeIconLocked: {
-    color: '#94A3B8',
-    fontSize: 18,
+  nodeLockImage: {
+    height: 34,
+    opacity: 0.75,
+    width: 34,
+  },
+  nodeLockImageCompact: {
+    height: 28,
+    width: 28,
   },
   nodeSignImage: {
-    height : 46,
-    width : 46
+    height: 46,
+    width: 46,
   },
   nodeSignImageCompact: {
-    height : 36,
-    width : 36
+    height: 36,
+    width: 36,
+  },
+  nodeDittoImage: {
+    height: 50,
+    width: 50,
+  },
+  nodeDittoImageCompact: {
+    height: 38,
+    width: 38,
   },
   labelCard: {
     alignItems: 'center',
@@ -419,6 +515,13 @@ const styles = StyleSheet.create({
   labelTitleLocked: {
     color: colors.muted,
   },
+  comingSoonCard: {
+    backgroundColor: colors.surface,
+  },
+  comingSoonText: {
+    color: colors.primary,
+    fontFamily: 'Nunito_800ExtraBold',
+  },
   xpRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -442,22 +545,21 @@ const styles = StyleSheet.create({
     height: 100,
   },
   doneBadge: {
-  alignItems: 'center',
-  backgroundColor: colors.success,
-  borderColor: colors.border,
-  borderRadius: 12,
-  borderWidth: 2,
-  bottom: -2,
-  height: 24,
-  justifyContent: 'center',
-  position: 'absolute',
-  right: -2,
-  width: 24,
-},
-
-doneBadgeText: {
-  color: '#FFFFFF',
-  fontFamily: 'Nunito_800ExtraBold',
-  fontSize: 14,
-},
+    alignItems: 'center',
+    backgroundColor: colors.success,
+    borderColor: colors.border,
+    borderRadius: 12,
+    borderWidth: 2,
+    bottom: -2,
+    height: 24,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: -2,
+    width: 24,
+  },
+  doneBadgeText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 14,
+  },
 });
