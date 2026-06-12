@@ -27,6 +27,10 @@ from app.infrastructure.db.sql.session import (
     get_async_session_factory,
 )
 from app.infrastructure.recognition.factory import get_sign_recognizer
+from app.infrastructure.security.rate_limit import (
+    rate_limiter,
+    recognition_concurrency_guard,
+)
 from scripts.seed_curriculum import seed
 
 
@@ -46,7 +50,13 @@ async def setup_db() -> AsyncGenerator[None, None]:
     await dispose_engine()
     await create_tables()
     await seed()
+    await rate_limiter.reset()
+    await recognition_concurrency_guard.reset()
+    app.dependency_overrides.clear()
     yield
+    await rate_limiter.reset()
+    await recognition_concurrency_guard.reset()
+    app.dependency_overrides.clear()
     get_sign_recognizer.cache_clear()
     await dispose_engine()
     if os.path.exists(_test_db):

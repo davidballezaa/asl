@@ -18,11 +18,17 @@ class Settings(BaseSettings):
     recognizer_impl: str = "stub"
     asl_rec_url: str = "http://172.20.70.2:5000/predict"
     asl_rec_timeout_seconds: float = 10.0
+    trusted_proxy_ips: str = "127.0.0.1,::1,172.20.70.165,172.20.70.166"
+    recognition_max_upload_bytes: int = 10 * 1024 * 1024
     api_prefix: str = "/api/v1"
 
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def trusted_proxy_ip_set(self) -> set[str]:
+        return {ip.strip() for ip in self.trusted_proxy_ips.split(",") if ip.strip()}
 
 
 @lru_cache

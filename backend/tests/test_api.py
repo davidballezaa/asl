@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import func, select
 
+from app.domain.entities.recognition import RecognitionResult
+from app.main import app
 from app.infrastructure.db.sql.models import (
     ExerciseAttemptModel,
     ExerciseOptionModel,
     UserLessonCompletionModel,
     UserLessonPracticeDayModel,
 )
+from app.presentation.deps import get_recognizer
 from app.infrastructure.db.sql.session import get_async_session_factory
 
 
@@ -324,3 +329,125 @@ async def test_recognize_stub(client: AsyncClient, auth_headers: dict):
     assert all(attempt.attempt_type == "camera" for attempt in attempts)
     assert [attempt.is_correct for attempt in attempts] == [True, False, True]
     assert attempts[0].confidence == pytest.approx(0.92)
+
+
+@pytest.mark.asyncio
+async def test_register_is_rate_limited(client: AsyncClient):
+    responses = []
+    for index in range(11):
+        responses.append(
+            await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "name": f"User {index}",
+                    "email": f"user{index}@example.com",
+                    "password": "secret123",
+                },
+            )
+        )
+
+    assert [response.status_code for response in responses[:10]] == [201] * 10
+    assert responses[10].status_code == 429
+    assert responses[10].headers["Retry-After"]
+
+
+@pytest.mark.asyncio
+async def test_login_is_limited_per_email(client: AsyncClient):
+    register = await client.post(
+        "/api/v1/auth/register",
+        json={"name": "Esme", "email": "esme@example.com", "password": "password1"},
+    )
+    assert register.status_code == 201
+
+    responses = []
+    for _ in range(6):
+        responses.append(
+            await client.post(
+                "/api/v1/auth/login",
+                json={"email": "esme@example.com", "password": "wrong-password"},
+            )
+        )
+
+    assert [response.status_code for response in responses[:5]] == [401] * 5
+    assert responses[5].status_code == 429
+    assert responses[5].headers["Retry-After"]
+
+
+@pytest.mark.asyncio
+async def test_recognize_rejects_oversized_upload(client: AsyncClient, auth_headers: dict):
+    response = await client.post(
+        "/api/v1/signs/recognize",
+        headers=auth_headers,
+        data={
+            "expected_sign": "A",
+            "lesson_id": "lesson-1",
+            "exercise_id": "camera-a",
+        },
+        files={"image": ("big.jpg", b"x" * (10 * 1024 * 1024 + 1), "image/jpeg")},
+    )
+
+    assert response.status_code == 413
+    assert response.json()["detail"] == "Image too large"
+
+
+@pytest.mark.asyncio
+async def test_recognize_is_rate_limited_per_user(client: AsyncClient, auth_headers: dict):
+    responses = []
+    for _ in range(13):
+        responses.append(
+            await client.post(
+                "/api/v1/signs/recognize",
+                headers=auth_headers,
+                data={
+                    "expected_sign": "A",
+                    "lesson_id": "lesson-1",
+                    "exercise_id": "camera-a",
+                },
+                files={"image": ("test.jpg", b"fake-image", "image/jpeg")},
+            )
+        )
+
+    assert [response.status_code for response in responses[:12]] == [200] * 12
+    assert responses[12].status_code == 429
+    assert responses[12].headers["Retry-After"]
+
+
+@pytest.mark.asyncio
+async def test_recognize_rejects_parallel_requests_for_same_user(
+    client: AsyncClient, auth_headers: dict
+):
+    class SlowRecognizer:
+        async def recognize(self, image_bytes: bytes, expected_sign: str) -> RecognitionResult:
+            del image_bytes, expected_sign
+            await asyncio.sleep(0.05)
+            return RecognitionResult(success=True, confidence=0.99, predicted_sign="A")
+
+    app.dependency_overrides[get_recognizer] = lambda: SlowRecognizer()
+    try:
+        responses = await asyncio.gather(
+            client.post(
+                "/api/v1/signs/recognize",
+                headers=auth_headers,
+                data={
+                    "expected_sign": "A",
+                    "lesson_id": "lesson-1",
+                    "exercise_id": "camera-a",
+                },
+                files={"image": ("test1.jpg", b"fake-image", "image/jpeg")},
+            ),
+            client.post(
+                "/api/v1/signs/recognize",
+                headers=auth_headers,
+                data={
+                    "expected_sign": "A",
+                    "lesson_id": "lesson-1",
+                    "exercise_id": "camera-a",
+                },
+                files={"image": ("test2.jpg", b"fake-image", "image/jpeg")},
+            ),
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    status_codes = sorted(response.status_code for response in responses)
+    assert status_codes == [200, 429]
