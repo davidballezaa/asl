@@ -85,3 +85,8 @@ This project uses visual assets from external sources for educational and protot
 
 ## Dito Image
 - https://www.pngaaa.com/detail/3630788
+
+## Light Bulb
+- Source: Flaticon
+- Creator: Freepik
+- Link: <a href="https://www.flaticon.com/free-icons/bulb" title="bulb icons">Bulb icons created by Freepik - Flaticon</a>

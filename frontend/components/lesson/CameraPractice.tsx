@@ -12,6 +12,7 @@ import {
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { colors } from '@/constants/colors';
+import { Hint } from '@/components/Hint';
 import { useAppData } from '@/context/AppDataContext';
 import { useLang } from '@/context/LangContext';
 import { recognizeSign } from '@/lib/api/signs';
@@ -209,7 +210,7 @@ export function CameraPractice({
       <NBCard style={styles.cameraCard}>
         <View style={styles.cameraWrap}>
           <CameraView ref={cameraRef} style={styles.camera} facing="front" />
-
+          <Hint exercise={exercise} />
           {status === 'scanning' && (
             <View style={styles.overlay}>
               <ActivityIndicator color="#fff" size="large" />
@@ -347,6 +348,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     width: '100%',
+    position: 'relative',
   },
   camera: {
     flex: 1,
