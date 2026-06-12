@@ -19,14 +19,29 @@ export default function ProfileScreen() {
   const { signOut } = useAuth();
   const { i18n } = useLang();
   const router = useRouter();
-  const { me } = useAppData();
+
+  const { me, refreshMe } = useAppData();
+
   const state = useGamification();
   const { isPro } = useSubscription();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [refreshingSubscription, setRefreshingSubscription] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     router.replace('/login');
+  };
+
+  const handleRefreshSubscription = async () => {
+    setRefreshingSubscription(true);
+
+    try {
+      await refreshMe();
+    } catch (error) {
+      console.log('Refresh subscription error:', error);
+    } finally {
+      setRefreshingSubscription(false);
+    }
   };
 
   return (
@@ -37,10 +52,28 @@ export default function ProfileScreen() {
       >
         <ScreenContainer size="narrow" style={styles.content}>
           <ProfileHeader
-            profile={me?.profile ?? { name: '', username: '', initials: '?', practiceDays: [] }}
+            profile={
+              me?.profile ?? {
+                name: '',
+                username: '',
+                initials: '?',
+                practiceDays: [],
+              }
+            }
             isPro={isPro}
             onPlanBadgePress={() => setUpgradeOpen(true)}
           />
+
+          {!isPro && (
+            <NBButton
+              title="Refresh subscription"
+              variant="secondary"
+              loading={refreshingSubscription}
+              onPress={() => {
+                void handleRefreshSubscription();
+              }}
+            />
+          )}
 
           {state && <LevelProgressCard level={state.level} />}
 
@@ -66,7 +99,10 @@ export default function ProfileScreen() {
       <ProUpgradeModal
         visible={upgradeOpen && !isPro}
         onClose={() => setUpgradeOpen(false)}
-        onUpgraded={() => setUpgradeOpen(false)}
+        onUpgraded={() => {
+          void refreshMe();
+          setUpgradeOpen(false);
+        }}
       />
     </SafeAreaView>
   );
