@@ -42,21 +42,48 @@ Use your LAN IP instead of `localhost` on a physical device.
 
 ## Production
 
-The backend runs as a systemd service (`asl-backend.service`) on the `salva-backend` instance, serving uvicorn directly on port `8000`. NGINX on `salva-lb` handles TLS termination and proxying.
+The active backend currently runs as a systemd service (`asl-backend.service`) on `salva-backend-2` (`172.20.70.140`), serving uvicorn directly on port `8000`. The frontend nodes proxy `/api/` to this host.
+
+Runtime layout:
+
+- Repo checkout: `/opt/asl`
+- Backend app: `/opt/asl/backend`
+- Virtualenv: `/opt/asl/backend/.venv-prod`
+- Env file: `/etc/asl-backend.env`
+- Service user: `debian`
 
 To deploy an update:
 
 ```bash
-# On salva-backend
+# On 172.20.70.140
+cd /opt/asl
+git fetch origin
+git reset --hard origin/main
+
 cd /opt/asl/backend
-git pull
 .venv-prod/bin/pip install .
 .venv-prod/bin/alembic upgrade head
-python -m scripts.seed_curriculum
+.venv-prod/bin/python -m scripts.seed_curriculum
 sudo systemctl restart asl-backend
 ```
 
+Verify after deploy:
+
+```bash
+systemctl status --no-pager --lines=8 asl-backend.service
+curl -sS http://127.0.0.1:8000/health
+curl -sS http://127.0.0.1:8000/api/v1/billing/plans
+```
+
 Environment is loaded from `/etc/asl-backend.env`.
+
+If the service fails immediately after restart, check:
+
+```bash
+journalctl -u asl-backend.service -n 50 --no-pager
+```
+
+The backend now requires the `stripe` Python package at runtime because `app.presentation.api.v1.billing` imports it on startup.
 
 ## Tests
 
