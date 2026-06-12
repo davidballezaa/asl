@@ -24,4 +24,8 @@ export const colors = {
   successLight: '#DCFCE7',
   errorLight: '#FEE2E2',
   secondaryLight: '#FEF3E2',
+
+  orange: '#E08117',
+  peach: '#E05851',
+  blue_light: '#529FEE',
 } as const;

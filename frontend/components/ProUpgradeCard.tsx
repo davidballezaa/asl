@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
 
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
+import { startBillingCheckout } from '@/lib/api/billing';
 import { useSubscription } from '@/lib/subscription';
 
 type ProUpgradeCardProps = {
@@ -15,16 +17,29 @@ type ProUpgradeCardProps = {
 export function ProUpgradeCard({
   compact,
   hideBadge,
-  onUpgraded,
 }: ProUpgradeCardProps) {
   const { i18n } = useLang();
-  const { isPro, isUpdating, upgrade } = useSubscription();
+  const { isPro } = useSubscription();
+  const [isOpeningCheckout, setIsOpeningCheckout] = useState(false);
+
+  const openStripeCheckout = async () => {
+    setIsOpeningCheckout(true);
+
+    try {
+      const checkout = await startBillingCheckout();
+      await Linking.openURL(checkout.url);
+    } catch (error) {
+      console.log('Checkout error:', error);
+    } finally {
+      setIsOpeningCheckout(false);
+    }
+  };
 
   if (isPro) {
     return (
       <NBCard style={[styles.card, compact && styles.cardCompact]}>
         <View style={styles.proBadge}>
-          <Text style={styles.proBadgeText}> {i18n.subscription.proBadge}</Text>
+          <Text style={styles.proBadgeText}>{i18n.subscription.proBadge}</Text>
         </View>
         <Text style={styles.proTitle}>{i18n.subscription.proActive}</Text>
         <Text style={styles.proDesc}>{i18n.subscription.proActiveDesc}</Text>
@@ -39,10 +54,13 @@ export function ProUpgradeCard({
           <Text style={styles.freeBadgeText}>{i18n.subscription.freeBadge}</Text>
         </View>
       )}
+
       {!hideBadge && (
         <Text style={styles.title}>{i18n.subscription.upgradeTitle}</Text>
       )}
+
       <Text style={styles.desc}>{i18n.subscription.upgradeDesc}</Text>
+
       {!compact && (
         <View style={styles.perks}>
           {i18n.subscription.perks.map((perk) => (
@@ -52,15 +70,13 @@ export function ProUpgradeCard({
           ))}
         </View>
       )}
+
       <NBButton
         title={i18n.subscription.upgradeCta}
         variant="secondary"
-        loading={isUpdating}
+        loading={isOpeningCheckout}
         onPress={() => {
-          void (async () => {
-            await upgrade();
-            onUpgraded?.();
-          })();
+          void openStripeCheckout();
         }}
       />
     </NBCard>

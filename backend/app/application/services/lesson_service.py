@@ -79,10 +79,11 @@ class LessonService:
         all_ids = await self._uow.curriculum.get_all_lesson_ids_in_order()
         if is_lesson_locked(lesson_id, progress.completed_lesson_ids, all_ids):
             raise LessonLockedError()
-        exercise_count = len(lesson.exercises)
-        completion_xp = (
-            exercise_count * XP_PER_EXERCISE + XP_LESSON_BONUS + lesson.xp_reward
-        )
+        completion_xp = lesson.xp_reward
+        #exercise_count = len(lesson.exercises)
+        #completion_xp = (
+        #    exercise_count * XP_PER_EXERCISE + XP_LESSON_BONUS + lesson.xp_reward
+        #)
         inserted = await self._uow.progress.complete_lesson(
             user_id,
             lesson_id,

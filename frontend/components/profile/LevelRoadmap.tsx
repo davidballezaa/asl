@@ -53,7 +53,7 @@ export function LevelRoadmap({ currentLevel, totalXp }: LevelRoadmapProps) {
               <Text style={styles.xp}>{tier.minXp} XP</Text>
             </View>
             {unlocked && (
-              <Text style={styles.check}>✓</Text>
+              <Text style={styles.check}>★</Text>
             )}
           </View>
         );

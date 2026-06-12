@@ -60,7 +60,11 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
 
     void completeLesson(lessonId)
       .then((result) => {
-        setXpEarned(result.xpEarned || lesson.xpReward);
+        console.log('completeLesson result:', result);
+        console.log('lesson.xpReward:', lesson.xpReward);
+
+        setXpEarned(result.xpEarned ?? lesson.xpReward);
+
         return refreshMe();
       })
       .finally(() => {

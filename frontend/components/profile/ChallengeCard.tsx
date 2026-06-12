@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { NBCard } from '@/components/NBCard';
 import { NBProgressBar } from '@/components/NBProgressBar';
@@ -9,6 +9,17 @@ import type { ChallengeProgress } from '@/lib/challenges';
 type ChallengeCardProps = {
   challenge: ChallengeProgress;
   onPress?: () => void;
+};
+
+const defaultChallengeImage = require('../../assets/icons/book-stack.png');
+
+const challengeImages: Record<string, number> = {
+  'streak-3': require('../../assets/icons/fire.png'),
+  'streak-7': require('../../assets/icons/fire.png'),
+  'alphabet-10': require('../../assets/icons/alphabet.png'),
+  'alphabet-26': require('../../assets/icons/trophy_Challenges.png'),
+  'practice-5': require('../../assets/icons/book-stack.png'),
+  'mastery-camera': require('../../assets/icons/photo.png'),
 };
 
 export function ChallengeCard({ challenge, onPress }: ChallengeCardProps) {
@@ -33,9 +44,15 @@ export function ChallengeCard({ challenge, onPress }: ChallengeCardProps) {
     <NBCard style={styles.card} onPress={onPress}>
       <View style={styles.topRow}>
         <View style={styles.titleRow}>
-          <Text style={styles.icon}>{challenge.icon}</Text>
+          <Image
+            source={challengeImages[challenge.id] ?? defaultChallengeImage}
+            style={styles.iconImage}
+            resizeMode="contain"
+          />
+
           <Text style={styles.name}>{challenge.title}</Text>
         </View>
+
         <Text style={styles.xp}>+{challenge.xpReward} XP</Text>
       </View>
 
@@ -81,8 +98,9 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 8,
   },
-  icon: {
-    fontSize: 20,
+  iconImage: {
+    width: 28,
+    height: 28,
   },
   name: {
     color: colors.text,

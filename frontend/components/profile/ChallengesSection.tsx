@@ -64,9 +64,9 @@ export function ChallengesSection({ challenges }: ChallengesSectionProps) {
 
 const styles = StyleSheet.create({
   viewAll: {
-    color: colors.primary,
+    color: colors.border,
     fontFamily: 'Nunito_700Bold',
-    fontSize: 14,
+    fontSize: 20,
     marginTop: 8,
     textAlign: 'right',
   },
