@@ -2,6 +2,22 @@
 
 Gamified American Sign Language fingerspelling app with structured lessons, camera-based sign practice, challenges, XP progression, Stripe subscriptions, and an admin dashboard.
 
+## Documentation
+
+This GitHub repository contains all project documentation and information for ASL Academy.
+
+**Production app:** https://10.49.12.41
+
+| Document | Contents |
+| --- | --- |
+| This README | Architecture, network, security, production deployment |
+| [frontend/README.md](frontend/README.md) | Expo client, code structure, build and deploy |
+| [backend/README.md](backend/README.md) | FastAPI, application layers, sign recognition |
+| [backend/DATABASE.md](backend/DATABASE.md) | Relational model, 3NF design, Alembic migrations |
+| [frontend/Credits.md](frontend/Credits.md) | Third-party visual asset attributions |
+
+**Local development:** start with [backend/README.md](backend/README.md), then [frontend/README.md](frontend/README.md).
+
 ## Features
 
 - **Curriculum path** — Units, lessons, and exercises served by the API (`GET /api/v1/curriculum/units`, `GET /api/v1/lessons/{id}`)
@@ -11,15 +27,6 @@ Gamified American Sign Language fingerspelling app with structured lessons, came
 - **Authentication** — JWT register/login (`POST /api/v1/auth/register`, `POST /api/v1/auth/login`)
 - **Subscriptions** — Stripe checkout and webhook handling (`/api/v1/billing/*`)
 - **Admin** — Curriculum management and usage metrics (`/api/v1/admin/*`)
-
-## Repository layout
-
-| Path | Role |
-| --- | --- |
-| [`frontend/`](frontend/) | Expo React Native / web client |
-| [`backend/`](backend/) | FastAPI API, Alembic migrations, seed scripts |
-| [`backend/DATABASE.md`](backend/DATABASE.md) | Normalized relational schema design (3NF) |
-| [`frontend/Credits.md`](frontend/Credits.md) | Third-party asset attributions |
 
 ## Architecture
 
