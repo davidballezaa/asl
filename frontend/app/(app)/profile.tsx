@@ -25,23 +25,10 @@ export default function ProfileScreen() {
   const state = useGamification();
   const { isPro } = useSubscription();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [refreshingSubscription, setRefreshingSubscription] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     router.replace('/login');
-  };
-
-  const handleRefreshSubscription = async () => {
-    setRefreshingSubscription(true);
-
-    try {
-      await refreshMe();
-    } catch (error) {
-      console.log('Refresh subscription error:', error);
-    } finally {
-      setRefreshingSubscription(false);
-    }
   };
 
   return (
@@ -63,17 +50,6 @@ export default function ProfileScreen() {
             isPro={isPro}
             onPlanBadgePress={() => setUpgradeOpen(true)}
           />
-
-          {!isPro && (
-            <NBButton
-              title="Refresh subscription"
-              variant="secondary"
-              loading={refreshingSubscription}
-              onPress={() => {
-                void handleRefreshSubscription();
-              }}
-            />
-          )}
 
           {state && <LevelProgressCard level={state.level} />}
 
