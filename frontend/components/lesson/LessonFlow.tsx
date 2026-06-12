@@ -175,7 +175,6 @@ export function LessonFlow({ lesson, lessonId }: LessonFlowProps) {
           <SignDemo
             key={exercise.id}
             exercise={exercise}
-            youtubeId={lesson.youtubeId}
             onContinue={goNext}
           />
         )}

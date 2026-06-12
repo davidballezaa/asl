@@ -1,60 +1,19 @@
-import { useState } from 'react';
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { NBButton } from '@/components/NBButton';
 import { NBCard } from '@/components/NBCard';
-import { ProUpgradeModal } from '@/components/ProUpgradeModal';
 import { SignIllustration } from '@/components/SignIllustration';
 import { colors } from '@/constants/colors';
 import { useLang } from '@/context/LangContext';
-import { useSubscription } from '@/lib/subscription';
 import type { Exercise } from '@/lib/mock-data';
 
 type SignDemoProps = {
   exercise: Exercise;
-  youtubeId?: string;
   onContinue: () => void;
 };
 
-function YoutubeEmbed({ videoId }: { videoId: string }) {
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.embedWrap}>
-        <iframe
-          title="ASL sign video"
-          src={`https://www.youtube-nocookie.com/embed/${videoId}`}
-          style={{
-            border: 'none',
-            borderRadius: 8,
-            height: '100%',
-            width: '100%',
-          }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.nativeVideo}>
-      <Text style={styles.nativeVideoEmoji}>▶️</Text>
-      <Text style={styles.nativeVideoText}>Pro video lesson</Text>
-    </View>
-  );
-}
-
-export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
+export function SignDemo({ exercise, onContinue }: SignDemoProps) {
   const { i18n } = useLang();
-  const { isPro } = useSubscription();
-  const [upgradeVisible, setUpgradeVisible] = useState(false);
 
   const displayLetter =
     exercise.contentType === 'letter'
@@ -62,71 +21,41 @@ export function SignDemo({ exercise, youtubeId, onContinue }: SignDemoProps) {
       : exercise.signWord.charAt(0).toUpperCase();
 
   return (
-    <>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.stepHeader}>
-          <View style={styles.stepBadge}>
-            <Text style={styles.stepBadgeText}>1</Text>
-          </View>
-          <Text style={styles.stepTitle}>{i18n.lesson.watchAndLearn}</Text>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.stepHeader}>
+        <View style={styles.stepBadge}>
+          <Text style={styles.stepBadgeText}>1</Text>
+        </View>
+        <Text style={styles.stepTitle}>{i18n.lesson.watchAndLearn}</Text>
+      </View>
+
+      <NBCard style={styles.lessonCard}>
+        <View style={styles.illustrationHero}>
+          <SignIllustration
+            word={exercise.signWord}
+            size="lg"
+            variant={exercise.contentType ?? 'letter'}
+            imageUrl={exercise.imageUrl}
+          />
         </View>
 
-        <NBCard style={styles.lessonCard}>
-          <View style={styles.illustrationHero}>
-            <SignIllustration
-              word={exercise.signWord}
-              size="lg"
-              variant={exercise.contentType ?? 'letter'}
-              imageUrl={exercise.imageUrl}
-            />
-          </View>
+        <View style={styles.letterRow}>
+          <Text style={styles.letter}>{displayLetter}</Text>
+          <Text style={styles.description}>{exercise.signDescription}</Text>
+        </View>
+      </NBCard>
 
-          <View style={styles.letterRow}>
-            <Text style={styles.letter}>{displayLetter}</Text>
-            <Text style={styles.description}>{exercise.signDescription}</Text>
-          </View>
-        </NBCard>
-
-        {isPro && youtubeId && (
-          <View style={styles.videoSection}>
-            <YoutubeEmbed videoId={youtubeId} />
-          </View>
-        )}
-
-        {!isPro && youtubeId && (
-          <Pressable
-            onPress={() => setUpgradeVisible(true)}
-            style={styles.videoHint}
-          >
-            <Text style={styles.videoHintText}>
-              {i18n.subscription.wantVideo}{' '}
-              <Text style={styles.videoHintLink}>
-                {i18n.subscription.upgradeLink}
-              </Text>
-            </Text>
-          </Pressable>
-        )}
-
-        <NBButton
-          title={i18n.lesson.gotIt}
-          variant="primary"
-          onPress={onContinue}
-          style={styles.button}
-        />
-      </ScrollView>
-
-      <ProUpgradeModal
-        visible={upgradeVisible}
-        onClose={() => setUpgradeVisible(false)}
-        onUpgraded={() => {
-          setUpgradeVisible(false);
-        }}
+      <NBButton
+        title={i18n.lesson.gotIt}
+        variant="primary"
+        onPress={onContinue}
+        style={styles.button}
       />
-    </>
+    </ScrollView>
   );
 }
 
@@ -196,47 +125,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_600SemiBold',
     fontSize: 15,
     lineHeight: 22,
-  },
-  videoSection: {
-    borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 3,
-    overflow: 'hidden',
-  },
-  embedWrap: {
-    aspectRatio: 16 / 9,
-    width: '100%',
-  },
-  nativeVideo: {
-    alignItems: 'center',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#1E293B',
-    justifyContent: 'center',
-  },
-  nativeVideoEmoji: {
-    fontSize: 32,
-  },
-  nativeVideoText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_600SemiBold',
-    fontSize: 14,
-    marginTop: 8,
-  },
-  videoHint: {
-    alignSelf: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  videoHintText: {
-    color: colors.muted,
-    fontFamily: 'Nunito_600SemiBold',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  videoHintLink: {
-    color: colors.primary,
-    fontFamily: 'Nunito_800ExtraBold',
-    textDecorationLine: 'underline',
   },
   button: {
     marginTop: 4,
