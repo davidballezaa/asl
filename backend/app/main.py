@@ -9,7 +9,7 @@ from app.presentation.api.v1.router import api_router
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="ASL Learning API", version="0.1.0")
+    app = FastAPI(title="ASL Academy API", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,

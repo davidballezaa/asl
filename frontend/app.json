@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ASL Quest",
+    "name": "ASL Academy",
     "slug": "asl-quest",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "ASL Quest uses the camera to practice and recognize your fingerspelling signs."
+        "NSCameraUsageDescription": "ASL Academy uses the camera to practice and recognize your fingerspelling signs."
       }
     },
     "android": {
@@ -32,7 +32,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow ASL Quest to access your camera for sign practice."
+          "cameraPermission": "Allow ASL Academy to access your camera for sign practice."
         }
       ]
     ],

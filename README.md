@@ -1,45 +1,133 @@
-# ASL Learning App
+# ASL Academy
 
-Gamified American Sign Language fingerspelling app with camera-based sign practice.
+Gamified American Sign Language fingerspelling app with structured lessons, camera-based sign practice, challenges, XP progression, Stripe subscriptions, and an admin dashboard.
 
-| Directory               | Description           |
-| ----------------------- | --------------------- |
-| [`frontend`](frontend/) | Expo React Native app |
-| [`backend`](backend/)   | FastAPI API           |
+## Features
 
-See the README in each directory to run locally.
+- **Curriculum path** — Units, lessons, and exercises served by the API (`GET /api/v1/curriculum/units`, `GET /api/v1/lessons/{id}`)
+- **Multiple-choice and camera practice** — Quiz exercises and live camera capture via `expo-camera`
+- **Sign recognition** — Camera frames sent to `POST /api/v1/signs/recognize`; backend delegates to an on-prem ML service
+- **Gamification** — XP, levels, streaks, practice heatmap, and weekly challenges
+- **Authentication** — JWT register/login (`POST /api/v1/auth/register`, `POST /api/v1/auth/login`)
+- **Subscriptions** — Stripe checkout and webhook handling (`/api/v1/billing/*`)
+- **Admin** — Curriculum management and usage metrics (`/api/v1/admin/*`)
 
-## Production deployment
+## Repository layout
 
-Production hosts keep a checkout of this repo at `/opt/asl`. Do not reclone for normal deploys; update the existing checkout in place.
+| Path | Role |
+| --- | --- |
+| [`frontend/`](frontend/) | Expo React Native / web client |
+| [`backend/`](backend/) | FastAPI API, Alembic migrations, seed scripts |
+| [`backend/DATABASE.md`](backend/DATABASE.md) | Normalized relational schema design (3NF) |
+| [`frontend/Credits.md`](frontend/Credits.md) | Third-party asset attributions |
 
-### Instance inventory
+## Architecture
 
-- Frontend 1: `debian@172.20.70.165`
-- Frontend 2: `debian@172.20.70.166`
-- Active backend: `debian@172.20.70.140`
-- SSH key: `equipo-salva`
+Production runs on a private OpenStack network with tiered services behind an NGINX load balancer.
 
-SSH pattern:
+```mermaid
+flowchart LR
+  client[LearnerClient] -->|HTTPS_443| lb[salva_lb_NGINX]
+  lb --> fe1[salva_frontend_1]
+  lb --> fe2[salva_frontend_2]
+  fe1 -->|"/api/* proxy"| api[salva_backend_FastAPI]
+  fe2 -->|"/api/* proxy"| api
+  api --> db[(salva_db_PostgreSQL)]
+  api -->|HTTP_predict| ai[OnPremRecognizer_172.20.70.2]
+```
+
+### Request flow
+
+1. The learner opens `https://10.49.12.41` (HTTPS terminates at the load balancer).
+2. NGINX distributes static traffic across two frontend replicas.
+3. Each frontend serves a static Expo web export and proxies `/api/` to the backend.
+4. The backend reads and writes curriculum, progress, and billing data in PostgreSQL.
+5. For camera exercises, the backend forwards frames to the on-prem recognizer when `RECOGNIZER_IMPL=asl_rec`.
+
+## Infrastructure and network
+
+| Role | Host | IP | Service |
+| --- | --- | --- | --- |
+| Load balancer | `salva-lb` | `172.20.70.149` | NGINX :443 |
+| Frontend 1 | `salva-frontend-1` | `172.20.70.165` | Static web :80 |
+| Frontend 2 | `salva-frontend-2` | `172.20.70.166` | Static web :80 |
+| Backend API | `salva-backend` | `172.20.70.140` | Uvicorn :8000 |
+| Database | `salva-db` | `172.20.70.144` | PostgreSQL :5432 |
+| On-prem ML | NixOS host | `172.20.70.2` | Docker/Flask :5000 |
+
+**Cloud:** OpenStack, availability zone `nova`, private subnet `172.20.70.0/24`.
+
+**Public access:** `https://10.49.12.41` — a Cisco router NAT rule forwards WAN port 443 to the load balancer (`10.49.12.41:443 → 172.20.70.149:443`). HTTP is not forwarded; the site is HTTPS-only.
+
+**Client network:** Learners and operators on the course Nube VLAN (`192.168.200.0/24`) reach the private infra subnet through an inter-VLAN gateway at `172.20.70.10`.
+
+**SSH access:** Instances are reachable over SSH from the course client network when routed to `172.20.70.0/24`. Use the team key pair issued for this project:
 
 ```bash
 ssh -i equipo-salva debian@172.20.70.140
 ```
 
-### Backend rollout (`172.20.70.140`)
+## Security posture
 
-The backend runs from:
+### Network segmentation
 
-- Repo checkout: `/opt/asl`
-- App directory: `/opt/asl/backend`
-- Virtualenv: `/opt/asl/backend/.venv-prod`
-- Service: `asl-backend.service`
-- Env file: `/etc/asl-backend.env`
+OpenStack security groups enforce tiered exposure. The load balancer is the public choke point; backend port 8000 is reachable only from the frontend tier; PostgreSQL port 5432 is reachable only from the backend.
 
-Deploy:
+| Security group | Ingress | Source | Egress |
+| --- | --- | --- | --- |
+| `sg-edge` (LB) | TCP 443 | Approved client CIDRs | TCP 80 to frontends |
+| `sg-frontend` | TCP 80 | `sg-edge` | Established traffic |
+| `sg-backend` | TCP 8000 | `sg-frontend` | TCP 5432 to DB; inference port to `172.20.70.2/32` |
+| `sg-database` | TCP 5432 | `sg-backend` | Established traffic |
+
+### Load balancer hardening
+
+`salva-lb` runs NGINX with request-rate and connection limits:
+
+- `limit_req_zone` at 10 requests/s per client IP (burst 20)
+- `limit_conn` at 20 concurrent connections per client IP
+- Client/header/send timeouts and `reset_timedout_connection`
+- Kernel SYN-cookie protection enabled (`tcp_syncookies = 1`)
+
+### Application controls
+
+- Passwords hashed with bcrypt (Passlib)
+- JWT access tokens with expiration
+- Backend secrets in `/etc/asl-backend.env` (root-owned, mode 600)
+- Uvicorn runs as non-root user `debian` under systemd
+
+### Known limitations
+
+- No application-level rate limiting on FastAPI yet (LB is the first line of defense)
+- JWT logout is stateless and does not revoke issued tokens
+- Single instances for backend, database, and load balancer (see Reliability)
+
+## Reliability
+
+- **Frontend tier:** Two NGINX replicas behind the load balancer provide horizontal redundancy for static content.
+- **Backend:** Single Uvicorn process with `Restart=always` under systemd.
+- **Database:** Single PostgreSQL 15 instance on a dedicated host.
+- **Load balancer:** Single NGINX ingress node.
+
+If a frontend replica is stale or unreachable, drain it on `salva-lb` (`172.20.70.149`) by marking its upstream `down` in `/etc/nginx/sites-enabled/*`, running `sudo nginx -t`, and reloading NGINX.
+
+## Quick start (local)
+
+1. Start the [backend](backend/README.md) (FastAPI on port 8000).
+2. Start the [frontend](frontend/README.md) (Expo dev server).
+
+## Production deployment
+
+Production hosts keep a checkout of this repo at `/opt/asl`. Update the existing checkout in place; do not reclone for normal deploys.
+
+**Deploy order:** backend → frontends (one node at a time) → verify load balancer upstreams.
+
+See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md) for package-specific setup details.
+
+### Backend rollout (`salva-backend`, `172.20.70.140`)
 
 ```bash
-ssh -i /Users/dave/Downloads/equipo-salva debian@172.20.70.140 '
+ssh -i equipo-salva debian@172.20.70.140 '
   set -e
   cd /opt/asl
   git fetch origin
@@ -62,18 +150,9 @@ ssh -i equipo-salva debian@172.20.70.140 '
 '
 ```
 
-### Frontend rollout (`172.20.70.165`, `172.20.70.166`)
+### Frontend rollout (`salva-frontend-1` / `salva-frontend-2`)
 
-Each frontend node serves a static Expo web export through NGINX.
-
-- Repo checkout: `/opt/asl`
-- App directory: `/opt/asl/frontend`
-- Build output: `/opt/asl/frontend/dist`
-- Web root: `/var/www/asl`
-- Service: `nginx`
-- API proxy target: `http://172.20.70.140:8000`
-
-Deploy one node at a time:
+Deploy one node at a time (`172.20.70.165`, `172.20.70.166`):
 
 ```bash
 ssh -i equipo-salva debian@172.20.70.166 '
@@ -90,7 +169,7 @@ ssh -i equipo-salva debian@172.20.70.166 '
 '
 ```
 
-`rsync` is not installed on the current frontend hosts, so publish with `cp -a` unless you install `rsync` first.
+`rsync` is not installed on the frontend hosts; publish with `sudo cp -a` unless you install `rsync` first.
 
 Verify:
 
@@ -102,9 +181,7 @@ ssh -i equipo-salva debian@172.20.70.166 '
 '
 ```
 
-### Notes
+### Deployment notes
 
-- Roll backend first, then frontends.
-- As of `2026-06-12`, `172.20.70.165` timed out on SSH while `172.20.70.166` and `172.20.70.140` were reachable.
-- If one frontend node is stale or unreachable, temporarily drain it on `salva-lb` (`172.20.70.149`) by editing the `upstream asl_frontends` block in `/etc/nginx/sites-enabled/*`, testing with `sudo nginx -t`, and reloading NGINX.
-- If a host checkout is dirty, inspect `git status` before resetting it. The deploy checkouts are expected to track `origin/main`.
+- If a host checkout is dirty, inspect `git status` before resetting. Deploy checkouts are expected to track `origin/main`.
+- Roll the backend before frontends so API changes are live before a new static bundle ships.
