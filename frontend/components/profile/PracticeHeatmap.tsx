@@ -10,10 +10,7 @@ type PracticeHeatmapProps = {
   practiceDays: string[];
 };
 
-const WEEKDAYS = {
-  es: ['D', 'L', 'Ma', 'Mi', 'J', 'V', 'S'],
-  en: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-} as const;
+const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 function getMonthWeeks(year: number, month: number): (number | null)[][] {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -46,7 +43,7 @@ function isStreakNeighbor(
 }
 
 export function PracticeHeatmap({ practiceDays }: PracticeHeatmapProps) {
-  const { lang, i18n } = useLang();
+  const { i18n } = useLang();
   const today = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -63,7 +60,7 @@ export function PracticeHeatmap({ practiceDays }: PracticeHeatmapProps) {
   const daySet = useMemo(() => new Set(practiceDays), [practiceDays]);
   const weeks = useMemo(() => getMonthWeeks(year, month), [year, month]);
 
-  const monthLabel = new Intl.DateTimeFormat(lang === 'es' ? 'es' : 'en', {
+  const monthLabel = new Intl.DateTimeFormat('en', {
     month: 'long',
     year: 'numeric',
   }).format(viewDate);
@@ -108,7 +105,7 @@ export function PracticeHeatmap({ practiceDays }: PracticeHeatmapProps) {
 
       <View style={styles.calendarWrapper}>
         <View style={styles.weekdayRow}>
-          {WEEKDAYS[lang].map((label, index) => (
+          {WEEKDAYS.map((label, index) => (
             <Text key={`${label}-${index}`} style={styles.weekdayLabel}>
               {label}
             </Text>

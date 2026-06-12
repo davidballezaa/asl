@@ -13,7 +13,7 @@ export function Navbar() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isSignedIn, signOut } = useAuth();
-  const { lang, setLang, i18n } = useLang();
+  const { i18n } = useLang();
   const state = useGamification();
 
   const handleSignOut = async () => {
@@ -38,33 +38,6 @@ export function Navbar() {
         </Pressable>
 
         <View style={styles.actions}>
-          <View style={styles.langToggle}>
-            <Pressable
-              onPress={() => setLang('es')}
-              style={[styles.langBtn, lang === 'es' && styles.langBtnActive]}
-            >
-              <Text
-                style={[styles.langText, lang === 'es' && styles.langTextActive]}
-              >
-                ES
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setLang('en')}
-              style={[
-                styles.langBtn,
-                styles.langBtnDivider,
-                lang === 'en' && styles.langBtnActive,
-              ]}
-            >
-              <Text
-                style={[styles.langText, lang === 'en' && styles.langTextActive]}
-              >
-                EN
-              </Text>
-            </Pressable>
-          </View>
-
           {isSignedIn ? (
             <>
               <View style={styles.statPill}>
@@ -153,38 +126,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  langToggle: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 4,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    shadowColor: colors.border,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  langBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  langBtnDivider: {
-    borderLeftColor: colors.border,
-    borderLeftWidth: 4,
-  },
-  langBtnActive: {
-    backgroundColor: colors.primary,
-  },
-  langText: {
-    color: colors.text,
-    fontFamily: 'Fredoka_700Bold',
-    fontSize: 13,
-  },
-  langTextActive: {
-    color: '#FFFFFF',
   },
   statPill: {
     alignItems: 'center',
